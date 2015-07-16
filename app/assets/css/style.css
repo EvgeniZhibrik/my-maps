@@ -52,7 +52,8 @@ footer {
 }
 
 #main-container,
-#login-form{
+#login-form,
+#registration-form{
   height: 100%;
   overflow: auto;
   padding-top: 0px;
@@ -67,6 +68,13 @@ footer {
 #left-sidebar,
 #right-sidebar{
   height: 100%;
+}
+
+#map-container{
+  border-radius: 15px;
+  border-style: solid;
+  border-width: medium;
+  border-color: #D4C098;
 }
 
 #left-sidebar{
@@ -100,7 +108,8 @@ footer {
   padding: 0;
 }
 
-#row-form-log{
+#row-form-log,
+#row-form-reg{
   height: 100%;
   overflow-y: auto;
 }
@@ -115,10 +124,24 @@ footer {
   transform: translateY(-50%);
 }
 
+#form-reg{
+  background-color: #D4C098;
+  border-radius: 15px;
+}
 .btn-menu{
   background-color: transparent;
   width: 100%;
 
+}
+
+.btn-menu:hover{
+  background-color: #836A50;
+  color: #F6F6E2;
+}
+
+.btn-offcanvas-left,
+.btn-offcanvas-right{
+  position: absolute;
 }
  /* Off Canvas
  * --------------------------------------------------
@@ -130,7 +153,8 @@ footer {
 
   }
 
-  #login-form{
+  #login-form,
+  #registration-form{
     padding-bottom: 0;
   }
 
@@ -138,7 +162,8 @@ footer {
     text-align: right;
   }
 
-  #form-log{
+  #form-log,
+  #form-reg{
     padding-top: 21px;
     border-radius: 0;
     top: 0;
@@ -192,7 +217,7 @@ footer {
     border-radius: 0;
   }
 
-  
+
   #user-info{
     border-radius: 0;
   }
@@ -227,6 +252,10 @@ footer {
     margin-right: 0px;
     margin-left: 0px;
     
+  }
+
+  #map-container{
+    border-radius: 0;
   }
 
   #main-menu{
