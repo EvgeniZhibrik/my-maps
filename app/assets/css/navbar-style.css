@@ -1,0 +1,46 @@
+.logotype{
+  color: #F6F6E2;
+  font-size: 1.5em;
+}
+
+.icon-bar{
+  background-color:  #F6F6E2;
+}
+
+.navbar-inverse{
+	background-color: #836A50;
+	color: #F6F6E2;
+  font-size: 1.5em;
+}
+
+.navbar-brand{
+  background-color: #836A50;
+  border-style: none;
+}
+
+.navbar-nav{
+  float:right;
+}
+.btn-topmenu{
+	background-color: #836A50;
+	color: #F6F6E2;
+	font-size: 1em;
+}
+
+@media screen and (max-width: 767px) {
+	.btn-topmenu{
+    width: 100%;
+    border-left-style: none;
+    float: none;
+  }
+
+
+  .navbar-nav{
+    float:none;
+  }
+
+  .logotype{
+    font-size: 1em;
+  }
+
+}

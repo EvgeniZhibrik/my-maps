@@ -1,0 +1,167 @@
+#main-container{
+  height: 100%;
+  overflow: hidden;
+  padding-top: 0px;
+  padding-bottom: 20px;
+}
+
+.row-offcanvas{
+  height: 100%;
+}
+
+#data,
+#map-container,
+#left-sidebar,
+#right-sidebar{
+  height: 100%;
+}
+
+#map-container{
+  border-radius: 15px;
+  border-style: solid;
+  border-width: medium;
+  border-color: #D4C098;
+}
+
+#left-sidebar,
+#right-sidebar{
+  background-color: #D4C098;
+  border-radius: 15px;
+  overflow-y: auto;
+}
+
+#user-info{
+  background-color: #F6F6E2;
+  margin-right: -15px;
+  margin-left: -15px;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+}
+
+#main-menu{
+  background-color: #E2D5C1;
+  margin-right: -15px;
+  margin-left: -15px;
+}
+
+#menu-buttons{
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.btn-menu{
+  background-color: transparent;
+  width: 100%;
+}
+
+.btn-menu:hover{
+  background-color: #836A50;
+  color: #F6F6E2;
+}
+
+.btn-offcanvas-left,
+.btn-offcanvas-right{
+  position: absolute;
+}
+
+@media screen and (max-width: 767px) {
+	#main-container{
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 20px;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    min-height: 100%;
+  }
+
+  #left-sidebar,
+  #data,
+  #right-sidebar{
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  #data{
+    padding-right: 21px;
+    padding-left: 21px;
+  }
+
+  #left-sidebar,
+  #right-sidebar{
+    padding-left: 0;
+    padding-right:0;
+    border-radius: 0;
+  }
+
+  #user-info{
+    border-radius: 0;
+  }
+
+  .row-offcanvas{
+    position: relative;
+    margin: 0;
+    right: 0;
+    -webkit-transition: all 0.5s ease-out 0s;
+    -moz-transition: all 0.5s ease-out 0s;
+    -o-transition: all 0.5s ease-out 0s;
+    transition: all 0.5s ease-out 0s;
+  }
+
+  .btn-offcanvas-left{
+
+    background-color: transparent;
+
+    position: absolute;
+    height: 100%;
+    left: 0;
+  }
+
+  .btn-offcanvas-right{
+    background-color: transparent;
+    position: absolute;
+    height: 100%;
+    right: 0;
+  }
+
+  #user-info{
+    margin-right: 0px;
+    margin-left: 0px;  
+  }
+
+  #map-container{
+    border-radius: 0;
+  }
+
+  #main-menu{
+    margin-right: 0px;
+    margin-left: 0px;
+  }
+  .row-offcanvas.active1 {
+    right: 100%;
+  }
+  .row-offcanvas.active2 {
+    right: -100%;
+  }
+
+  .sidebar-offcanvas-right{
+    position: absolute;
+    right: -100%;
+    top: 0;
+    width: 100%;
+  }
+  .sidebar-offcanvas-left{
+    position: absolute;
+    right: 100%;
+    top: 0;
+    width: 100%;
+  }
+
+
+
+
+
+
+
+}

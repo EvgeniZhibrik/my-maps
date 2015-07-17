@@ -1,0 +1,41 @@
+#login-form{
+  height: 100%;
+  overflow: auto;
+  padding-top: 0px;
+  padding-bottom: 20px;
+}
+
+#row-form-log{
+  height: 100%;
+  overflow-y: auto;
+}
+
+#form-log{
+  background-color: #D4C098;
+  border-radius: 15px;
+  position: relative;
+  top: 50%;
+  -ms-transform: translateY(-50%);
+  -webkit-transform: translateY(-50%);
+  transform: translateY(-50%);
+}
+
+@media screen and (max-width: 767px) {
+	#login-form{
+    	padding-bottom: 0;
+  }
+
+
+  .control-label{
+   	text-align: right;
+  }
+
+  #form-log{
+	  padding-top: 21px;
+	  border-radius: 0;
+	  top: 0;
+	  -ms-transform: none;
+	  -webkit-transform: none;
+	  transform: none;
+  }
+}
