@@ -5,7 +5,7 @@ html,
 body {
   height: 100%;
   overflow-x: hidden; /* Prevent scroll on narrow devices */
-  font-family: "Georgia", Times, serif;
+  font-family: "Verdana" , sans-serif;
 }
 
 hr{
@@ -27,5 +27,10 @@ h3{
 @media screen and (max-width: 767px) {
   body{
     padding-top: 50px;
+    padding-bottom: 33px;
+  }
+
+  hr{
+    margin: 1px;
   }
 }

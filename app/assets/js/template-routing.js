@@ -5,7 +5,12 @@ $(document).ready(function () {
 	var registrationForm = $(links.eq(2).get(0).import.getElementById('registration-form'));
 	var mainContainer =  $(links.eq(1).get(0).import.getElementById('main-container'));
 
-	
+	navbar.find('#exit').click(function(){
+		if($('#main-container').length){
+			mainContainer = $('#main-container').detach();
+			loginForm.insertAfter(navbar);
+		}
+	});
 
 	loginForm.find('#sign-in').click(function () {
 		loginForm = $('#login-form').detach();

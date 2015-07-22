@@ -31,7 +31,7 @@
 }
 
 #user-info{
-  background-color: #F6F6E2;
+  background-color: white;
   margin-right: -15px;
   margin-left: -15px;
   border-top-left-radius: 15px;
@@ -151,17 +151,12 @@
     top: 0;
     width: 100%;
   }
+  
   .sidebar-offcanvas-left{
     position: absolute;
     right: 100%;
     top: 0;
     width: 100%;
   }
-
-
-
-
-
-
 
 }
