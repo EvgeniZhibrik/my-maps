@@ -13,8 +13,21 @@ $(document).ready(function () {
 	});
 
 	loginForm.find('#sign-in').click(function () {
-		loginForm = $('#login-form').detach();
-		mainContainer.insertAfter(navbar);
+		$.ajax({
+			url: "http://localhost:8000/api/v1.0/",
+			type: "GET",
+			dataType : "json",
+			success: function( json ) {
+				console.log(json);
+				loginForm = $('#login-form').detach();
+				mainContainer.insertAfter(navbar);	
+			},
+			error: function( xhr, status, errorThrown ) {
+				alert( "Sorry, there was a problem!" );
+				console.log( "Error: " + errorThrown );
+				console.log( "Status: " + status );
+			},
+		});		
 	});
 	loginForm.find('#register').click(function(){
 		loginForm = $('#login-form').detach();

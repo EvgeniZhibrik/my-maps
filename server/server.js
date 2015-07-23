@@ -238,7 +238,6 @@ var rankingSchema =  new mongoose.Schema({
 
 var RankingModel = mongoose.model( 'Ranking', rankingSchema);
 
-
 app.get('/*', function(req, res, next) {
     res.contentType('application/json');
     next();
@@ -257,12 +256,23 @@ app.delete('/*', function(req, res, next) {
 });
 
 var router = express.Router();
+
+router.get('/', function(req, res){
+    console.log('haha');
+    res.status(200).json({ name : "qwerty"});
+});
+
+
     
 app.use('/api/v1.0', router);
 
+var blabla =function (server) {
+  var host = server.address();
+  var port = server.address().port;
 
+  console.log('Example app listening at'+ host);
+}
 
-app.listen(port);
-
-console.log('Magic happens on port ' + port);
+var server = app.listen(port);
+blabla(server);
  
