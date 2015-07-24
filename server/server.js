@@ -14,219 +14,41 @@ var app = express();
 var port = 8000;
 
 mongoose.connect(db.url);
-
+var schemas = require('./config/designDB')(mongoose);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
+
+var UserModel = mongoose.model( 'User', schemas.userSchema );
  
-var userSchema = new mongoose.Schema({
-        active: Boolean,
-        email: { type: String, trim: true, lowercase: true },
-        firstName: { type: String, trim: true },
-        lastName: { type: String, trim: true },
-        avatar: { type: String, trim: true },
-        friends: { type: [mongoose.Schema.Types.ObjectId], default: [] },
-        created: { type: Date, default: Date.now },
-        lastLogin: { type: Date, default: Date.now },
-        details: mongoose.Schema.Types.Mixed
-    },
-    {
-        collection: 'user' 
-    }
-);
+var CafeModel = mongoose.model( 'Cafe', schemas.cafeSchema );
 
-var UserModel = mongoose.model( 'User', userSchema );
+var FotoModel = mongoose.model( 'Foto', schemas.fotoSchema );
 
-var cafeSchema = new mongoose.Schema({
-        name: {type: String, trim: true},
-        website: {type: String, trim: true, default: ''},
-        coordinates: {
-            latitude: {type: Number},
-            longitude: {type: Number}
-        },
-        description: {type: String, trim: true},
-        publishedBy: { type: mongoose.Schema.Types.ObjectId },
-        published: { type: Date},
-        menu: mongoose.Schema.Types.Mixed
-    },
-    {
-        collection: 'cafe'
-    }
-);
- 
- var CafeModel = mongoose.model( 'Cafe', cafeSchema );
+var CafeCommentModel = mongoose.model('CafeComment', schemas.cafeCommentSchema );
 
-var fotoSchema = new mongoose.Schema({
-        description: { type: String, trim: true },
-        title: { type: String, trim: true },
-        cafeID: { type: mongoose.Schema.Types.ObjectId },
-        publishedBy: {type: mongoose.Schema.Types.ObjectId},
-        published: { type: Date },
-        link: { type: String, trim: true  }
-    },
-    {
-        collection: 'foto' 
-    }
-);
- 
-var FotoModel = mongoose.model( 'Foto', fotoSchema );
+var MarksModel = mongoose.model('Marks', schemas.marksSchema);
 
-var cafeCommentSchema = new mongoose.Schema({
-        userID: { type: mongoose.Schema.Types.ObjectId },
-        cafeID: { type: mongoose.Schema.Types.ObjectId },
-        text: { type: String, trim: true},
-        date: { type: Date }
-    },
-    {
-        collection: 'cafeComment' 
-    }
- );
+var FavoritesModel = mongoose.model( 'Favorites', schemas.favoritesSchema);
 
-var CafeCommentModel = mongoose.model('CafeComment', cafeCommentSchema );
+var FotoCommentModel = mongoose.model( 'FotoComment', schemas.fotoCommentSchema);
 
-var marksSchema =  new mongoose.Schema({
-        userID: { type: mongoose.Schema.Types.ObjectId },
-        cafeID: { type: mongoose.Schema.Types.ObjectId },
-        category: { type: mongoose.Schema.Types.ObjectId }, 
-        mark: { type: Number }
-    },
-    {
-        collection: 'marks' 
-    }
- );
+var CafeCommentCommentModel = mongoose.model( 'CafeCommentComment', schemas.cafeCommentCommentSchema);
 
-var MarksModel = mongoose.model('Marks', marksSchema);
+var NewsModel = mongoose.model( 'News', schemas.newsSchema);
 
-var favoritesSchema =  new mongoose.Schema({
-        userID: { type: mongoose.Schema.Types.ObjectId },
-        cafeID: { type: mongoose.Schema.Types.ObjectId },
-    },
-    {
-        collection: 'favorites' 
-    }
- );
+var NewsCommentModel = mongoose.model( 'NewsComment', schemas.newsCommentSchema);
 
-var FavoritesModel = mongoose.model( 'Favorites', favoritesSchema);
+var UserFotoModel = mongoose.model( 'UserFoto', schemas.userFotoSchema);
 
-var fotoCommentSchema =  new mongoose.Schema({
-        userID: { type: mongoose.Schema.Types.ObjectId },
-        fotoID: { type: mongoose.Schema.Types.ObjectId },
-        text: { type: String, trim: true}, 
-        date: { type: Date }
-    },
-    {
-        collection: 'fotoComment' 
-    }
- );
+var NewsCafeModel = mongoose.model( 'NewsCafe', schemas.newsCafeSchema);
 
-var FotoCommentModel = mongoose.model( 'FotoComment', fotoCommentSchema);
+var DiscussionModel = mongoose.model( 'Discussion', schemas.discussionSchema);
 
+var DiscussionCommentModel = mongoose.model( 'DiscussionComment', schemas.discussionCommentSchema);
 
-var cafeCommentCommentSchema =  new mongoose.Schema({
-        userID: { type: mongoose.Schema.Types.ObjectId },
-        cafeCommentID: { type: mongoose.Schema.Types.ObjectId },
-        text: {type: String, trim: true},
-        date: { type: Date }
-    },
-    {
-        collection: 'cafeCommentComment' 
-    }
- );
+var UserDiscussionModel = mongoose.model( 'UserDiscussion', schemas.userDiscussionSchema);
 
-var CafeCommentCommentModel = mongoose.model( 'CafeCommentComment', cafeCommentCommentSchema);
-
-var newsSchema =  new mongoose.Schema({
-        text: { type: String, trim: true},
-        link: { type: String, trim: true},
-        date: { type: Date }
-    },
-    {
-        collection: 'news' 
-    }
- );
-
-var NewsModel = mongoose.model( 'News', newsSchema);
-
-var newsCommentSchema =  new mongoose.Schema({
-        userID: { type: mongoose.Schema.Types.ObjectId },
-        newsID: { type: mongoose.Schema.Types.ObjectId },
-        text: { type: String, trim: true},
-        date: { type: Date }
-    },
-    {
-        collection: 'newsComment' 
-    }
- );
-
-var NewsCommentModel = mongoose.model( 'NewsComment', newsCommentSchema);
-
-var userFotoSchema =  new mongoose.Schema({
-        userID: { type: mongoose.Schema.Types.ObjectId },
-        fotoID: { type: mongoose.Schema.Types.ObjectId }
-    },
-    {
-        collection: 'userFoto' 
-    }
- );
-
-var UserFotoModel = mongoose.model( 'UserFoto', userFotoSchema);
-
-var newsCafeSchema =  new mongoose.Schema({
-        newsID: { type: mongoose.Schema.Types.ObjectId },
-        cafeID: { type: mongoose.Schema.Types.ObjectId }
-    },
-    {
-        collection: 'newsCafe' 
-    }
- );
-
-var NewsCafeModel = mongoose.model( 'NewsCafe', newsCafeSchema);
-
-var discussionSchema = new mongoose.Schema({
-        title: { type: String, trim: true},
-        createdBy: { type: mongoose.Schema.Types.ObjectId},
-        created: {type: Date, default: Date.now}
-    },
-    {
-        collection: 'discussion' 
-    }
- );
-
-var DiscussionModel = mongoose.model( 'Discussion', discussionSchema);
-
-var discussionCommentSchema =  new mongoose.Schema({
-        userID: { type: mongoose.Schema.Types.ObjectId },
-        discussionID: { type: mongoose.Schema.Types.ObjectId },
-        text: { type: String, trim: true},
-        date: { type: Date }
-    },
-    {
-        collection: 'discussionComment' 
-    }
- );
-
-var DiscussionCommentModel = mongoose.model( 'DiscussionComment', discussionCommentSchema);
-
-var userDiscussionSchema =  new mongoose.Schema({
-        userID: { type: mongoose.Schema.Types.ObjectId },
-        discussionID: { type: mongoose.Schema.Types.ObjectId }
-    },
-    {
-        collection: 'userDiscussion' 
-    }
- );
-
-var UserDiscussionModel = mongoose.model( 'UserDiscussion', userDiscussionSchema);
-
-var rankingSchema =  new mongoose.Schema({
-        category: { type: String, trim: true},
-        mark: {type: Number }
-    },
-    {
-        collection: 'ranking' 
-    }
- );
-
-var RankingModel = mongoose.model( 'Ranking', rankingSchema);
+var RankingModel = mongoose.model( 'Ranking', schemas.rankingSchema);
 
 app.all('/*', function(req,res,next){
     res.contentType('application/json');
