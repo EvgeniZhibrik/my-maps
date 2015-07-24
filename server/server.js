@@ -1,33 +1,23 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
-var stormpath = require('express-stormpath');
+
 var db	 = require('./config/db');
 var security = require('./config/security');
 
-var app = express();
-var morgan = require('morgan');
-app.use(morgan);
-app.use(stormpath.init(app, {
-     apiKeyFile: security.apiKeyFile,
-     application: security.application,
-     secretKey: security.secretKey
-}));
+var stormpath = require('stormpath');
+var client = null;
+var appStormpath = null;
+var keyfile = security.apiKeyFile;
 
+var app = express();
 var port = 8000;
 
 mongoose.connect(db.url);
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true}));
  
-app.use(bodyParser.urlencoded({ extended: true }));
- 
-
-
-app.use(function(req, res, next){
-   res.status(404);
-   res.json({ error: 'Invalid URL' });
-});
-
-
 var userSchema = new mongoose.Schema({
         active: Boolean,
         email: { type: String, trim: true, lowercase: true },
@@ -238,20 +228,12 @@ var rankingSchema =  new mongoose.Schema({
 
 var RankingModel = mongoose.model( 'Ranking', rankingSchema);
 
-app.get('/*', function(req, res, next) {
+app.all('/*', function(req,res,next){
     res.contentType('application/json');
-    next();
-});
-app.post('/*', function(req, res, next) {
-    res.contentType('application/json');
-    next();
-});
-app.put('/*', function(req, res, next) {
-    res.contentType('application/json');
-    next();
-});
-app.delete('/*', function(req, res, next) {
-    res.contentType('application/json');
+    res.set({
+        'Access-Control-Allow-Origin':'*',
+        "Access-Control-Allow-Methods":"PUT, DELETE, POST, GET, OPTIONS"
+    });
     next();
 });
 
@@ -259,20 +241,53 @@ var router = express.Router();
 
 router.get('/', function(req, res){
     console.log('haha');
-    res.status(200).json({ name : "qwerty"});
+    res.json({ name : "qwerty"});
 });
 
+router.post('/user/register/',function(req, res){
+    var newUser = req.body;
+    var account = {
+        givenName: newUser.firstName,
+        surname: newUser.lastName,
+        email: newUser.email,
+        password: newUser.password
+    };
+    console.log(appStormpath);
+    appStormpath.createAccount(account, function(err, acc){
+        if(err){
+            console.log(err);
+            res.status(err.status).send(err.message);
+        }
+        else{
+            newUser.active = true;
+            newUser.avatar = "";
+            var user = new UserModel(newUser);
+            user.save(function(error){
+                if(!error){
+                    newUser.id = user._id;
+                    res.json(newUser);
+                }
+                else{
+                    console.log(error);
+                    res.status(400).send('DB :(');
+                }
 
-    
+            });
+        }
+    });
+});
+
 app.use('/api/v1.0', router);
 
-var blabla =function (server) {
-  var host = server.address();
-  var port = server.address().port;
-
-  console.log('Example app listening at'+ host);
-}
-
-var server = app.listen(port);
-blabla(server);
- 
+stormpath.loadApiKey(keyfile, function apiKeyFileLoaded(err, apiKey) {
+    if (err) throw err;
+    client = new stormpath.Client({apiKey: apiKey});
+    console.log('Created client! ' + client);
+    
+    client.getApplication(security.application ,function(error, application) {
+        if (error) throw error;
+        appStormpath = application;
+        console.log('Stormpath Application retrieved! ' + appStormpath) ;
+        app.listen(port);
+    });
+});
