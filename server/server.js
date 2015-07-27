@@ -2,7 +2,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 
-var db	 = require('./config/db');
+var db = require('./config/db');
 var security = require('./config/security');
 
 var stormpath = require('stormpath');
@@ -60,11 +60,6 @@ app.all('/*', function(req,res,next){
 });
 
 var router = express.Router();
-
-router.get('/', function(req, res){
-    console.log('haha');
-    res.json({ name : "qwerty"});
-});
 
 router.post('/user/register/',function(req, res){
     var newUser = req.body;
