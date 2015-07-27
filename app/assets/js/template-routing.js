@@ -4,6 +4,7 @@ $(document).ready(function () {
 	var loginForm = $(links.eq(0).get(0).import.getElementById('login-form'));
 	var registrationForm = $(links.eq(2).get(0).import.getElementById('registration-form'));
 	var mainContainer =  $(links.eq(1).get(0).import.getElementById('main-container'));
+	var user;
 
 	function registerFormValid(){
 		var inp = $('.form-control');
@@ -19,34 +20,29 @@ $(document).ready(function () {
 
 	}
 
+	var changePage = (function (navb){
+		return function (oldPage, newPage) {
+			oldPage = oldPage.detach();
+			newPage.insertAfter(navb);
+		}
+	})(navbar);
 
 	navbar.find('#exit').click(function(){
 		if($('#main-container').length){
-			mainContainer = $('#main-container').detach();
-			loginForm.insertAfter(navbar);
+			logout({email: user.email}, function(json){
+				user = null;
+				console.log(json);
+				changePage(mainContainer, loginForm);
+			});
 		}
 	});
 
-	loginForm.find('#sign-in').click(function () {
-		$.ajax({
-			url: "http://localhost:8000/api/v1.0/user/login/",
-			type: "POST",
-			dataType : "json",
-			data: {
-				email: $('#input-email').val(),
-				password: $('#input-password').val()
-			},
-			success: function( json ) {
-				console.log(json);
-				loginForm = $('#login-form').detach();
-				mainContainer.insertAfter(navbar);	
-			},
-			error: function( xhr, status, errorThrown ) {
-				alert( "Sorry, there was a problem!" );
-				console.log( "Error: " + errorThrown );
-				console.log( "Status: " + status );
-			}
-		});		
+	loginForm.find('#sign-in').click(function(){
+		login ($('#input-email').val(), $('#input-password').val(), function(json){
+			changePage(loginForm, mainContainer);
+			user = json;
+			setUserData(user);
+		});
 	});
 	loginForm.find('#register').click(function(){
 		loginForm = $('#login-form').detach();
@@ -75,23 +71,13 @@ $(document).ready(function () {
 					birthday: $('#reg-bday').val()
 				}
 			};
-			$.ajax({
-				url: "http://localhost:8000/api/v1.0/user/register/",
-				type: "POST",
-				dataType : "json",
-				data: newUser,
-				success: function( json ) {
-					console.log(json);
-					registrationForm = $('#registration-form').detach();
-					mainContainer.insertAfter(navbar);
-				},
-				error: function( xhr, status, errorThrown ) {
-					alert( "Sorry, there was a problem!" );
-					console.log( "Error: " + errorThrown );
-					console.log( "Status: " + status );
-					console.log(xhr);
-					//handleRegistrationError(xhr);
-				}
+			registration(newUser, function(json){
+				console.log(json);
+				login (json.email, json.password, function(json){
+					changePage(registrationForm, mainContainer);
+					user = json;
+					setUserData(user);
+				});
 			});
 		}
 	});

@@ -5,6 +5,11 @@
   padding-bottom: 20px;
 }
 
+.info-name{
+  text-align: right;
+  font-style: italic;
+}
+
 .row-offcanvas{
   height: 100%;
 }

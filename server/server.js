@@ -78,22 +78,82 @@ router.post('/user/register/',function(req, res){
     appStormpath.createAccount(account, function(err, acc){
         if(err){
             console.log(err);
-            res.status(err.status).send(err.message);
+            res.status(err.status).send(err);
         }
         else{
-            newUser.active = true;
+            newUser.active = false;
             newUser.avatar = "";
             var user = new UserModel(newUser);
-            user.save(function(error){
-                if(!error){
-                    newUser.id = user._id;
-                    res.json(newUser);
+            user.save(function(err){
+                if(!err){
+                    acc.getCustomData(function(err, customData){
+                        if(err) res.status(err.status).send(err);
+                        customData.id = user._id;
+                        customData.save(function(err){
+                            if(err) res.status(err.status).send(err);
+                            else res.json(newUser);   
+                        });
+                    });  
                 }
-                else{
-                    console.log(error);
-                    res.status(400).send('DB :(');
+                else {
+                    console.log(err);
+                    res.status(err.status).send(err);
                 }
 
+            });
+        }
+    });
+});
+
+router.post('/user/login/', function(req, res){
+    console.log(req.body);
+    appStormpath.authenticateAccount(req.body, function(err, result){
+        if(err){
+            console.log(err);
+            res.status(err.status).send(err);
+        }
+        else {
+            result.getAccount(function(err, account){
+                if(err) res.status(err.status).send(err);
+                else {
+                    account.getCustomData(function(err, customData){
+                        if(err) res.status(err.status).send(err);
+                        else {
+                            UserModel.findById(customData.id, function(err, user){
+                                if(err) res.status(err.status).send(err);
+                                else {
+                                    user.lastLogin = Date.now();
+                                    user.active = true;
+                                    user.save(function(err, updUser){
+                                        if(err) res.status(err.status).send(err);
+                                        else {
+                                            console.log(updUser);
+                                            res.json(updUser);
+                                        }
+                                    });
+                                    
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        }
+    });
+});
+
+router.post('/user/logout/', function (req, res){
+    console.log(req.body);
+    console.log(req.body.email);
+    UserModel.findOne ( {email : req.body.email} , function(err , user){
+        if(err) res.status(err.status).send(err);
+        else{
+            user.active = false;
+            user.save(function(err, updUser){
+                if(err) res.status(err.status).send(err);
+                else{
+                    res.status(200).json({text: 'haha'});
+                }
             });
         }
     });
