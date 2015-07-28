@@ -1,4 +1,5 @@
 $(document).ready(function () {
+	$.cloudinary.config({"api_key":"273934557518459","cloud_name":"coffeebreak"});
 	var navbar = $('.navbar');
 	var links = $('link[rel="import"]');
 	var loginForm = $(links.eq(0).get(0).import.getElementById('login-form'));
@@ -6,19 +7,7 @@ $(document).ready(function () {
 	var mainContainer =  $(links.eq(1).get(0).import.getElementById('main-container'));
 	var user;
 
-	function registerFormValid(){
-		var inp = $('.form-control');
-		inp.each(function(ind, elem){
-			if(!$(elem).val())
-				return 1;
-		});
-		if($('#reg-email1').val() != $('#reg-email2').val())
-			return 2;
-		if($('#reg-password1').val() != $('#reg-password2').val())
-			return 3;
-		return 0;
-
-	}
+	
 
 	var changePage = (function (navb){
 		return function (oldPage, newPage) {
@@ -44,10 +33,17 @@ $(document).ready(function () {
 			setUserData(user);
 		});
 	});
+
 	loginForm.find('#register').click(function(){
-		loginForm = $('#login-form').detach();
-		registrationForm.insertAfter(navbar);
+		getUploadTag(function(json){
+			registrationForm.find('.upload-form').append($(json.tag));
+			loginForm = $('#login-form').detach();
+			registrationForm.insertAfter(navbar);
+
+		});
+		
 	});
+	
 	registrationForm.find('#registration').click(function(){
 		var c = registerFormValid();
 		switch(c){
@@ -82,7 +78,9 @@ $(document).ready(function () {
 		}
 	});
 
+	
+	loginForm.insertAfter(navbar);
 	activateOffcanvas(mainContainer);
 
-	loginForm.insertAfter(navbar);
+	
 });

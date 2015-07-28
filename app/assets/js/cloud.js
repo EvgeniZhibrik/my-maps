@@ -1,0 +1,1 @@
+$.cloudinary.config({"api_key":"273934557518459","cloud_name":"coffeebreak"});

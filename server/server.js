@@ -4,7 +4,8 @@ var mongoose = require('mongoose');
 
 var db = require('./config/db');
 var security = require('./config/security');
-
+var cloudinary = require('cloudinary');
+var cloudConfig = require('./config/cloud');
 var stormpath = require('stormpath');
 var client = null;
 var appStormpath = null;
@@ -15,6 +16,9 @@ var port = 8000;
 
 mongoose.connect(db.url);
 var schemas = require('./config/designDB')(mongoose);
+cloudinary.config(cloudConfig);
+var cloudinary_cors = "http://localhost:8000/api/v1.0/cloudinary_cors.html";
+cloudinary.uploader.image_upload_tag('image_id', { callback: cloudinary_cors });
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
@@ -60,6 +64,19 @@ app.all('/*', function(req,res,next){
 });
 
 var router = express.Router();
+
+router.get('/upload/', function(req, res){
+    var s = cloudinary.uploader.image_upload_tag('image_id',{ 
+        disableImageResize: false,
+        imageMaxWidth: 1000,
+        imageMaxHeight: 1000,
+        acceptFileTypes: /(\.|\/)(gif|jpe?g|png|bmp|ico)$/i,
+        maxFileSize: 5000000 // 5MB 
+    });
+    console.log(s)
+    res.json({tag: s});
+});
+
 
 router.post('/user/register/',function(req, res){
     var newUser = req.body;
@@ -153,6 +170,8 @@ router.post('/user/logout/', function (req, res){
         }
     });
 });
+
+
 
 app.use('/api/v1.0', router);
 
