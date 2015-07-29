@@ -5,6 +5,18 @@
   padding-bottom: 20px;
 }
 
+.progress-bar {
+   background-color: transparent;
+   padding: 0;
+   height: 30px;
+   width: 100%;
+}
+
+.progress{
+  background-color: black;
+  margin: 0;
+  height: 100%;
+}
 
 #row-form-reg{
   height: 100%;

@@ -16,9 +16,14 @@ var port = 8000;
 
 mongoose.connect(db.url);
 var schemas = require('./config/designDB')(mongoose);
+console.log(cloudConfig);
 cloudinary.config(cloudConfig);
-var cloudinary_cors = "http://localhost:8000/api/v1.0/cloudinary_cors.html";
+var cloudinary_cors = "D:/Exadel/my-maps/server/config/cloudinary_cors.html";
 cloudinary.uploader.image_upload_tag('image_id', { callback: cloudinary_cors });
+var t;
+/*cloudinary.uploader.upload("D:/Exadel/my-maps/app/assets/img/background3.jpg", function(result){
+    console.log(result);
+});*/
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
