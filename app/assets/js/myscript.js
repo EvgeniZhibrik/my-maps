@@ -1,6 +1,6 @@
 function getUploadTag(callback){
 	$.ajax({
-		url: "http://localhost:8000/api/v1.0/upload/",
+		url: "http://localhost:8000/api/v1.0/upload_tag/",
 		type: "GET",
 		dataType : "json",
 		success: function(json){
@@ -94,6 +94,10 @@ function logout(email, callback){
 } 
 
 function setUserData(user){
+	$('#ava').html($.cloudinary.image(user.avatar, {
+		alt: "ava here"
+	}));
+	$('#ava img').addClass('img-responsive');
 	var mainHtml = $('<h3>' + user.firstName + ' ' + user.lastName + '</h3>');
 	$('#inform').html(mainHtml);
 	addInfo(user.details);
@@ -106,3 +110,20 @@ function addInfo(info){
 	}
 }
 
+function deleteNotStoredAvatar(public_id, callback){
+	$.ajax({
+		url: "http://localhost:8000/api/v1.0/image/"+public_id+"/false/",
+		type: "DELETE",
+		dataType : "json",
+		success: function(json){
+			callback && callback(json);
+		},
+		error: function( xhr, status, errorThrown ) {
+			alert( "Sorry, there was a problem!" );
+			console.log( "Error: " + errorThrown );
+			console.log( "Status: " + status );
+			console.log(xhr);
+			//handleRegistrationError(xhr);
+		}
+	});
+}

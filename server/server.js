@@ -70,7 +70,7 @@ app.all('/*', function(req,res,next){
 
 var router = express.Router();
 
-router.get('/upload/', function(req, res){
+router.get('/upload_tag/', function(req, res){
     var s = cloudinary.uploader.image_upload_tag('image_id',{ 
         disableImageResize: false,
         imageMaxWidth: 1000,
@@ -82,6 +82,18 @@ router.get('/upload/', function(req, res){
     res.json({tag: s});
 });
 
+router.delete('/image/:public_id/:stored/', function(req, res){
+    console.log("DELETE " + req.params.public_id + ' ' + req.params.stored);
+    if(req.params.stored === 'false'){
+        cloudinary.uploader.destroy(req.params.public_id, function(result){
+            console.log(result);
+            res.json(result);
+        });
+    }
+    else{
+        res.status(400).send(':(');
+    }
+});
 
 router.post('/user/register/',function(req, res){
     var newUser = req.body;
@@ -91,7 +103,6 @@ router.post('/user/register/',function(req, res){
         email: newUser.email,
         password: newUser.password
     };
-    console.log(appStormpath);
     appStormpath.createAccount(account, function(err, acc){
         if(err){
             console.log(err);
@@ -99,17 +110,22 @@ router.post('/user/register/',function(req, res){
         }
         else{
             newUser.active = false;
-            newUser.avatar = "";
             var user = new UserModel(newUser);
             user.save(function(err){
                 if(!err){
                     acc.getCustomData(function(err, customData){
-                        if(err) res.status(err.status).send(err);
-                        customData.id = user._id;
-                        customData.save(function(err){
-                            if(err) res.status(err.status).send(err);
-                            else res.json(newUser);   
-                        });
+                        if(err) {
+                            res.status(err.status).send(err);
+                        }
+                        else {
+                            customData.id = user._id;
+                            customData.save(function(err){
+                                if(err) 
+                                    res.status(err.status).send(err);
+                                else 
+                                    res.json(newUser);
+                            });
+                        }
                     });  
                 }
                 else {
