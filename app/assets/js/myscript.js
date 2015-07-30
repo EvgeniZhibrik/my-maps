@@ -158,3 +158,9 @@ function setupUploadInput(tag, uplForm, app){
 		app.setAvatar(data.result.public_id);
 	});
 }
+
+function validateEmail(email) 
+{
+    var re = /[^\s@]+@[^\s@]+\.[^\s@]+/;
+    return re.test(email);
+}
