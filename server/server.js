@@ -16,14 +16,11 @@ var port = 8000;
 
 mongoose.connect(db.url);
 var schemas = require('./config/designDB')(mongoose);
-console.log(cloudConfig);
 cloudinary.config(cloudConfig);
 var cloudinary_cors = "D:/Exadel/my-maps/server/config/cloudinary_cors.html";
 cloudinary.uploader.image_upload_tag('image_id', { callback: cloudinary_cors });
 var t;
-/*cloudinary.uploader.upload("D:/Exadel/my-maps/app/assets/img/background3.jpg", function(result){
-    console.log(result);
-});*/
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
@@ -71,6 +68,7 @@ app.all('/*', function(req,res,next){
 var router = express.Router();
 
 router.get('/upload_tag/', function(req, res){
+    console.log('GET upload tag');
     var s = cloudinary.uploader.image_upload_tag('image_id',{ 
         disableImageResize: false,
         imageMaxWidth: 1000,
@@ -78,7 +76,7 @@ router.get('/upload_tag/', function(req, res){
         acceptFileTypes: /(\.|\/)(gif|jpe?g|png|bmp|ico)$/i,
         maxFileSize: 5000000 // 5MB 
     });
-    console.log(s)
+    console.log("response: "+s);
     res.json({tag: s});
 });
 
@@ -96,6 +94,7 @@ router.delete('/image/:public_id/:stored/', function(req, res){
 });
 
 router.post('/user/register/',function(req, res){
+    console.log("POST register new user");
     var newUser = req.body;
     var account = {
         givenName: newUser.firstName,
@@ -139,7 +138,7 @@ router.post('/user/register/',function(req, res){
 });
 
 router.post('/user/login/', function(req, res){
-    console.log(req.body);
+    console.log("POST login: "+req.body);
     appStormpath.authenticateAccount(req.body, function(err, result){
         if(err){
             console.log(err);
@@ -176,7 +175,7 @@ router.post('/user/login/', function(req, res){
 });
 
 router.post('/user/logout/', function (req, res){
-    console.log(req.body);
+    console.log("POST logout: "+req.body);
     console.log(req.body.email);
     UserModel.findOne ( {email : req.body.email} , function(err , user){
         if(err) res.status(err.status).send(err);

@@ -127,3 +127,34 @@ function deleteNotStoredAvatar(public_id, callback){
 		}
 	});
 }
+
+function setupUploadInput(tag, uplForm, app){
+	uplForm.append($(tag));
+	uplForm.append($('<div class="preview"></div><div class = "progress-bar"><div class = "progress"></div></div>'));
+	var inp = $("input.cloudinary-fileupload[type=file]");
+	inp.cloudinary_fileupload();
+	var progr = $('.progress');
+	progr.hide();
+	inp.on('cloudinarystart', function(e){
+		$('.preview').html('');
+		if(app.getAvatar()){
+			deleteNotStoredAvatar(app.getAvatar());
+			app.setAvatar(null);
+		}
+		progr.show();
+	});
+	inp.on('fileuploadprogress', function(e,data){
+		progr.css('width', Math.round((data.loaded * 100.0) / data.total) + '%');
+	});
+	inp.on('cloudinarydone', function(e, data) {
+		progr.hide();
+		$('.preview').html( $.cloudinary.image(data.result.public_id, { 
+			format: data.result.format, 
+			version: data.result.version, 
+			crop: 'fit', 
+			width: 150, 
+			height: 100 
+		}));
+		app.setAvatar(data.result.public_id);
+	});
+}
