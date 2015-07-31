@@ -16,6 +16,21 @@ function getUploadTag(callback){
 	});
 }
 
+function cleanLoginForm(){
+	$('#input-email').val('').parents('.has-feedback').removeClass('has-error').removeClass('has-success');
+	$('#input-password').val('').parents('.has-feedback').removeClass('has-success');
+	$('#sign-in').attr('disabled', 'disabled');
+}
+
+function cleanMainContainer(){
+	$('#additional-user-info').html('');
+}
+
+function cleanRegistrationForm(){
+	$('.form-control').val('');
+	$('.upload-form').html('');
+}
+
 function registerFormValid(){
 		var inp = $('.form-control');
 		inp.each(function(ind, elem){
@@ -106,7 +121,12 @@ function setUserData(user){
 function addInfo(info){
 	var s = $('#additional-user-info');
 	for (item in info){
-		s.append('<div class = "row"><div class = "col-xs-5 info-name">' + item + '</div><div class = "col-xs-7">' + info[item] + '</div></div>');
+		if(item === 'birthday'){
+			var t = new Date(info[item]);
+			s.append('<div class = "row"><div class = "col-xs-5 info-name">' + item + '</div><div class = "col-xs-7">' + t.toLocaleDateString() + '</div></div>');
+		}
+		else
+			s.append('<div class = "row"><div class = "col-xs-5 info-name">' + item + '</div><div class = "col-xs-7">' + info[item] + '</div></div>');
 	}
 }
 
