@@ -927,7 +927,7 @@
         $(e.target).trigger('cloudinaryprogressall',data);
       });
       this.bind("fileuploadfail", function(e,data){
-        $(e.target).trigger('cloudinaryfail',data);
+        $(e.target).trigger('cloudinaryfail',data); 
       });
       this.bind("fileuploadalways", function(e,data){
         $(e.target).trigger('cloudinaryalways',data);

@@ -1,0 +1,40 @@
+#register-cafe-form{
+  height: 100%;
+  overflow: auto;
+  padding-top: 0px;
+  padding-bottom: 20px;
+}
+
+.progress-bar {
+   background-color: transparent;
+   padding: 0;
+   height: 30px;
+   width: 100%;
+}
+
+.progress{
+  background-color: black;
+  margin: 0;
+  height: 100%;
+}
+
+#row-form-reg-cafe{
+  height: 100%;
+  overflow-y: auto;
+}
+
+#form-reg-cafe{
+  background-color: #D4C098;
+  border-radius: 15px;
+}
+
+@media screen and (max-width: 767px) {
+	#register-cafe-form{
+    	padding-bottom: 0;
+  	}
+
+  	#form-reg-cafe{
+    	padding-top: 21px;
+    	border-radius: 0;
+  	}
+}

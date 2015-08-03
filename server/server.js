@@ -191,7 +191,42 @@ router.post('/user/logout/', function (req, res){
     });
 });
 
+router.post('/cafe/', function(req, res){
+    console.log("POST cafe " + req.body);
+    var cafe = new CafeModel(req.body);
+    cafe.save(function(err){
+        if(!err){
+            res.json(cafe);
+        }
+        else{
+            res.status(err.status).send(err);
+        }
+    });
+});
 
+router.post('/photo/', function(req, res){
+    console.log('POST photo '+ req.body);
+    var photo = new FotoModel(req.body);
+    photo.save(function(err){
+        if(!err){
+            res.json(photo);
+        }
+        else{
+            res.status(err.status).send(err);
+        }
+    });
+});
+
+router.get('/cafe/', function(req, res){
+    console.log('GET cafe');
+    var allCafe = CafeModel.find(function(err, result){
+        if(err)
+            res.status(err.status).send(err);
+        else
+            res.json(result);
+    });
+
+});
 
 app.use('/api/v1.0', router);
 

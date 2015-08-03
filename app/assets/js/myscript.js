@@ -45,7 +45,10 @@ function registerFormValid(){
 
 	}
 
-
+function cleanRegisterCafeForm(){
+	$('.form-control').val('');
+	$('.upload-form').html('');
+}
 
 
 function login(username, password, callback) {
@@ -113,8 +116,8 @@ function setUserData(user){
 		alt: "ava here"
 	}));
 	$('#ava img').addClass('img-responsive');
-	var mainHtml = $('<h3>' + user.firstName + ' ' + user.lastName + '</h3>');
-	$('#inform').html(mainHtml);
+	
+	$('#inform').html(user.firstName + ' ' + user.lastName);
 	addInfo(user.details);
 }
 
@@ -126,7 +129,7 @@ function addInfo(info){
 			s.append('<div class = "row"><div class = "col-xs-5 info-name">' + item + '</div><div class = "col-xs-7">' + t.toLocaleDateString() + '</div></div>');
 		}
 		else
-			s.append('<div class = "row"><div class = "col-xs-5 info-name">' + item + '</div><div class = "col-xs-7">' + info[item] + '</div></div>');
+			s.append('<div class = "row"><div class = "col-xs-5 info-name font-responsive">' + item + '</div><div class = "col-xs-7 font-responsive">' + info[item] + '</div></div>');
 	}
 }
 
@@ -148,13 +151,15 @@ function deleteNotStoredAvatar(public_id, callback){
 	});
 }
 
-function setupUploadInput(tag, uplForm, app){
+function setupUploadAvatarInput(tag, uplForm, app){
 	uplForm.append($(tag));
 	uplForm.append($('<div class="preview"></div><div class = "progress-bar"><div class = "progress"></div></div>'));
 	var inp = $("input.cloudinary-fileupload[type=file]");
+	
 	inp.cloudinary_fileupload();
 	var progr = $('.progress');
 	progr.hide();
+
 	inp.on('cloudinarystart', function(e){
 		$('.preview').html('');
 		if(app.getAvatar()){
@@ -176,6 +181,106 @@ function setupUploadInput(tag, uplForm, app){
 			height: 100 
 		}));
 		app.setAvatar(data.result.public_id);
+	});
+}
+
+function setupUploadInput(tag, uplForm, app){
+	uplForm.append($(tag));
+	uplForm.append($('<div class="preview"></div><div class = "progress-bar"><div class = "progress"></div></div>'));
+	var inp = $("input.cloudinary-fileupload[type=file]");
+	inp.attr('multiple', 'multiple');
+	inp.cloudinary_fileupload();
+	var progr = $('.progress');
+	progr.hide();
+	var photoes = [];
+	inp.on('cloudinarystart', function(e){
+		if(app.getPhotoes()){
+			var f = app.getPhotoes().reduceRight(function(prev,cur, ind, arr){
+				return function(){
+					deleteNotStoredAvatar(cur, prev);
+				};
+			}, 
+			function(){ 
+				console.log('DELETED!!!');
+			});
+			f();
+		}
+
+		$('.preview').html('');
+		progr.show();
+	});
+	inp.on('fileuploadprogressall', function(e,data){
+		progr.css('width', Math.round((data.loaded * 100.0) / data.total) + '%');
+	});
+	inp.on('cloudinarydone', function(e, data) {
+		$('.preview').append( $.cloudinary.image(data.result.public_id, { 
+			format: data.result.format, 
+			version: data.result.version, 
+			crop: 'fit', 
+			width: 150, 
+			height: 100 
+		})).append(app.makePhotoForm(data.result.public_id));
+
+		photoes.push(data.result.public_id);
+	});
+	inp.on('cloudinarystop', function(e, data){
+		app.setPhotoes(photoes);
+	});
+}
+
+function getCafe(callback){
+	$.ajax({
+		url: "http://localhost:8000/api/v1.0/cafe/",
+		type: "GET",
+		dataType : "json",
+		success: function(json){
+			callback && callback(json);
+		},
+		error: function( xhr, status, errorThrown ) {
+			alert( "Sorry, there was a problem!" );
+			console.log( "Error: " + errorThrown );
+			console.log( "Status: " + status );
+			console.log(xhr);
+			//handleRegistrationError(xhr);
+		}
+	});
+}
+
+function registerCafe(newCafe,callback){
+	$.ajax({
+		url: "http://localhost:8000/api/v1.0/cafe/",
+		type: "POST",
+		data: newCafe,
+		dataType : "json",
+		success: function(json){
+			callback && callback(json);
+		},
+		error: function( xhr, status, errorThrown ) {
+			alert( "Sorry, there was a problem!" );
+			console.log( "Error: " + errorThrown );
+			console.log( "Status: " + status );
+			console.log(xhr);
+			//handleRegistrationError(xhr);
+		}
+	});
+}
+
+function sendNewPhoto(newPhoto, callback){
+	$.ajax({
+		url: "http://localhost:8000/api/v1.0/photo/",
+		type: "POST",
+		data: newPhoto,
+		dataType : "json",
+		success: function(json){
+			callback && callback(json);
+		},
+		error: function( xhr, status, errorThrown ) {
+			alert( "Sorry, there was a problem!" );
+			console.log( "Error: " + errorThrown );
+			console.log( "Status: " + status );
+			console.log(xhr);
+			//handleRegistrationError(xhr);
+		}
 	});
 }
 

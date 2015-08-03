@@ -6,18 +6,25 @@ var appState = (function () {
 		var loginForm = $(links.eq(0).get(0).import.getElementById('login-form'));
 		var registrationForm = $(links.eq(2).get(0).import.getElementById('registration-form'));
 		var mainContainer =  $(links.eq(1).get(0).import.getElementById('main-container'));
+		var registerCafeForm = $(links.eq(3).get(0).import.getElementById('register-cafe-form'));
+		var registerSentPhoto = $(links.eq(4).get(0).import.getElementById('register-sent-photo').innerHTML);
 		var user;
 		var avatar;
+		var photoes;
+		var currentPage = loginForm;
 		function privateMethod(){
 			console.log( "I am private" );
 		}
 		var privateVariable = "Im also private";
 		return {
 			changePage: (function (navb){
-				return function (oldPage, newPage) {
-					oldPage = oldPage.detach();
-					newPage.insertAfter(navb);
-				}
+				return function (newPage) {
+					if(currentPage != newPage){
+						currentPage.detach();
+						newPage.insertAfter(navb);
+						currentPage = newPage;
+					}
+				};
 			})(navbar),
 			getNavbar: function(){
 				return navbar;
@@ -31,17 +38,34 @@ var appState = (function () {
 			getMainContainer: function(){
 				return mainContainer;
 			},
+			getRegisterCafeForm: function(){
+				return registerCafeForm;
+			},
+			getCurrentPage: function(){
+				return currentPage;
+			},
 			getUser: function(){
 				return user;
 			},
 			getAvatar: function(){
 				return avatar;
 			},
+			getPhotoes: function(){
+				return photoes;
+			},
 			setUser: function(obj){
 				user = obj;
 			},
 			setAvatar: function(public_id){
 				avatar = public_id;
+			},
+			setPhotoes: function(phot){
+				photoes = phot;
+			},
+			makePhotoForm: function(public_id){
+				var s = registerSentPhoto.clone();
+				s.find('.form-control').addClass(public_id);
+				return s;
 			}
 		};
 	};

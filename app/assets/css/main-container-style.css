@@ -43,6 +43,12 @@
   border-top-right-radius: 15px;
 }
 
+#ava,
+#inform{
+  padding: 0;
+}
+
+
 #main-menu{
   background-color: #E2D5C1;
   margin-right: -15px;
