@@ -228,7 +228,7 @@ function setupUploadInput(tag, uplForm, app){
 	});
 }
 
-function getCafe(callback){
+/*function getCafe(callback){
 	$.ajax({
 		url: "http://localhost:8000/api/v1.0/cafe/",
 		type: "GET",
@@ -244,7 +244,7 @@ function getCafe(callback){
 			//handleRegistrationError(xhr);
 		}
 	});
-}
+}*/
 
 function registerCafe(newCafe,callback){
 	$.ajax({

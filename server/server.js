@@ -218,14 +218,46 @@ router.post('/photo/', function(req, res){
 });
 
 router.get('/cafe/', function(req, res){
-    console.log('GET cafe');
-    var allCafe = CafeModel.find(function(err, result){
+    console.log('GET cafe ' + req.query);
+    var arr = req.query.bbox.split(',').map(function(cur){
+        return parseFloat(cur);
+    });
+    console.log(arr);
+    CafeModel.find({
+        'coordinates.latitude': {$gt: arr[0], $lt: arr[2]},
+        'coordinates.longitude': {$gt: arr[1], $lt: arr[3]},
+    },function(err, result){
         if(err)
             res.status(err.status).send(err);
-        else
-            res.json(result);
+        else{
+            console.log(result);
+            var obj = {
+                "type": "FeatureCollection",
+                "features": []
+            }
+            result.forEach(function(doc){
+                //var photoes = FotoModel.find({});
+                var newCafe = {
+                    type: "Feature",
+                    id: doc._id,
+                    geometry: {
+                        type: "Point",
+                        coordinates: [doc.coordinates.latitude, doc.coordinates.longitude]
+                    },
+                    properties: {
+                        cafe: doc,
+                        fotos:[],
+                        photoTag: '',
+                        comments: [],
+                        commentsTag:''
+                    }
+                };
+                obj.features.push(newCafe);
+            });
+            console.log(obj.features);
+            res.jsonp(obj);
+        }
     });
-
 });
 
 app.use('/api/v1.0', router);

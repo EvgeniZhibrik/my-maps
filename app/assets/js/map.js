@@ -5,12 +5,11 @@ function init(){
 		if($('#map-container').length){
 			myMap = new ymaps.Map("map-container", {
        			center: [53.901090 , 27.558759],
-        		zoom: 11
+        		zoom: 18
     		});
+            myMap.geoObjects.add(loadingObjectManager);
     		clearInterval(myInt);
-            getCafe(function(json){
-                console.log(json);
-            });
+            
 		}
 	},500);    
     var MyBalloonContentLayoutClass = ymaps.templateLayoutFactory.createClass(
@@ -20,6 +19,20 @@ function init(){
     	'<p>Фотографии: {% if properties.fotos.length %}{{properties.photoTag}}{% else %}нет{% endif %}</p>' +
     	'<p>Отзывы: {% if properties.comments.length %}{{properties.commentsTag}}{% else %}нет{% endif %}</p>'
 	);
+
+    var loadingObjectManager = new ymaps.LoadingObjectManager('http://localhost:8000/api/v1.0/cafe/?bbox=%b&z=%z',
+      {   
+        // Включаем кластеризацию.
+        clusterize: true,
+        splitRequests: true,
+        // Опции кластеров задаются с префиксом cluster.
+        clusterHasBalloon: true,
+        clusterDisableClickZoom: true,
+        clusterOpenBaloonOnClick: true,
+        // Опции объектов задаются с префиксом geoObject
+        geoObjectOpenBalloonOnClick: true,
+        geoObjectBaloonContentLayout: MyBalloonContentLayoutClass
+      });
 
 }
 
