@@ -235,27 +235,43 @@ router.get('/cafe/', function(req, res){
                 "type": "FeatureCollection",
                 "features": []
             }
-            result.forEach(function(doc){
+            var f = result.reduceRight(function(prev, cur, ind, arr){
                 //var photoes = FotoModel.find({});
-                var newCafe = {
-                    type: "Feature",
-                    id: doc._id,
-                    geometry: {
-                        type: "Point",
-                        coordinates: [doc.coordinates.latitude, doc.coordinates.longitude]
-                    },
-                    properties: {
-                        cafe: doc,
-                        fotos:[],
-                        photoTag: '',
-                        comments: [],
-                        commentsTag:''
-                    }
-                };
-                obj.features.push(newCafe);
+                return function (){
+                    FotoModel.find({cafeID: cur._id},function(err, result){
+                        if(err)
+                            res.status(err.status).send(err);
+                        else{
+                            var ar = [];
+                            result.forEach(function(cur){
+                                ar.push(cloudinary.url(cur.link, {crop: 'fit', width:150, height:100}));
+                            });
+                            var newCafe = {
+                                type: "Feature",
+                                id: cur._id,
+                                geometry: {
+                                    type: "Point",
+                                    coordinates: [cur.coordinates.latitude, cur.coordinates.longitude]
+                                },
+                                properties: {
+                                    cafe: cur,
+                                    comments: [],
+                                    photos: ar,
+                                    commentsTag:'',
+                                    clusterCaption: cur.name,
+                                    balloonContentBody: cur.description
+                                }
+                            };
+                            obj.features.push(newCafe);
+                            prev();
+                        }
+                    });
+                }
+            }, function(){
+                console.log(obj.features);
+                res.jsonp(obj);
             });
-            console.log(obj.features);
-            res.jsonp(obj);
+            f();
         }
     });
 });
