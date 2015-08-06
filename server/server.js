@@ -56,6 +56,80 @@ var UserDiscussionModel = mongoose.model( 'UserDiscussion', schemas.userDiscussi
 
 var RankingModel = mongoose.model( 'Ranking', schemas.rankingSchema);
 
+function setBalloonContentBody(doc, photoes){
+    var i = parseInt(Math.random()*photoes.length);
+    console.log(i);
+    console.log(photoes[i].link);
+    var im = cloudinary.url(photoes[i].link, {});
+    console.log(im);
+    var s = '<div class = "container-fluid">'+
+        '<div class = "row">'+
+            '<div class = "col-xs-12 col-sm-4 balloon-photo">'+
+                ((photoes.length)?'<img class="img-responsive img-rounded" src = "'+ im +'"/>' : 'No photo') + 
+            '</div>'+
+            '<div class = "col-xs-12 col-sm-8 balloon-description">'+
+                doc.description+
+            '</div>'+
+        '</div>'+
+        '<div class = "row">'+
+            '<div class = "col-xs-12 col-sm-4">'+
+            '</div>'+
+            '<div class = "col-xs-12 col-sm-8">'+
+                '<button class = "btn btn-success" type="button" onclick = "route('+doc._id+')">Route</button>'+
+                '<button class = "btn btn-info" type="button" onclick = "openCafePage('+doc._id+')">Cafe page</button>'+
+            '</div>'+
+        '</div>'+
+    '</div>';
+    console.log(s);
+    return s;
+}
+
+function setBalloonContentHeader(doc, rank){
+    var s = '<div class = "container-fluid">'+
+        '<div class = "row">'+
+            '<div class="col-xs-10 balloon-header">'+
+                '<strong>'+doc.name+'</strong>'+
+            '</div>'+
+            '<div class="col-xs-2 balloon-rating" style="background-color:'+ getRankingColor(rank)+'">'+
+                '<strong>'+rank+'</strong>'+
+            '</div>'+
+        '</div>'+
+    '</div>';
+    console.log(s);
+    return s;
+}
+
+function componentToHex(c) {
+    var hex = c.toString(16);
+    return hex.length == 1 ? "0" + hex : hex;
+}
+
+function getRankingColor(rank){
+    var H = 0, S = 0, V = 0.5;
+    if(rank >= 0){
+        S = 1;
+        V = 1;
+        H = parseInt(120 * (rank/10.0), 10);
+    }
+    var C = V*S;
+    var X = C * ( 1 - Math.abs((H/60)%2 - 1));
+    var m = V - C;
+    var R,G,B;
+    if(H < 60){
+        R = parseInt((m + C)*255);
+        G = parseInt((m + X)*255);
+        B = parseInt((m + 0)*255);
+    }
+    else {
+        R = parseInt((m + X)*255);
+        G = parseInt((m + C)*255);
+        B = parseInt((m + 0)*255);
+    }
+    return "#" + componentToHex(R) + componentToHex(G) + componentToHex(B);
+
+}
+
+
 app.all('/*', function(req,res,next){
     res.contentType('application/json');
     res.set({
@@ -258,8 +332,9 @@ router.get('/cafe/', function(req, res){
                                     comments: [],
                                     photos: ar,
                                     commentsTag:'',
-                                    clusterCaption: cur.name,
-                                    balloonContentBody: cur.description
+                                    //clusterCaption: cur.name,
+                                    balloonContentBody: setBalloonContentBody(cur, result),
+                                    balloonContentHeader: setBalloonContentHeader(cur, Math.round((Math.random()*10)*10)/10.0)
                                 }
                             };
                             obj.features.push(newCafe);
@@ -275,6 +350,7 @@ router.get('/cafe/', function(req, res){
         }
     });
 });
+
 
 app.use('/api/v1.0', router);
 

@@ -169,8 +169,7 @@ module.exports = function (mongoose){
         ),
 
         rankingSchema:  new mongoose.Schema({
-                category: { type: String, trim: true},
-                mark: {type: Number }
+                category: { type: String, trim: true}
             },
             {
                 collection: 'ranking' 

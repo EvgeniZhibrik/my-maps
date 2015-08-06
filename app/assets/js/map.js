@@ -12,14 +12,14 @@ function init(){
             
 		}
 	},500);    
-    var MyBalloonContentLayoutClass = ymaps.templateLayoutFactory.createClass(
+    /*var MyBalloonContentLayoutClass = ymaps.templateLayoutFactory.createClass(
     	'<h3>{{ properties.cafe.name }}</h3>' +
     	'<p>Описание: {{ properties.cafe.description }}</p>' +
     	'<p>Сайт: {{ properties.cafe.website|default:"неизвестно" }}</p>' +
     	'<div class = "fototag">Фотографии: {% for value in properties.photos %}<img src={{value}} />{% endfor %}</div> ' +
 
     	'<p>Отзывы: {% if properties.comments.length %}{{properties.commentsTag}}{% else %}нет{% endif %}</p>'
-	);
+	);*/
 
     var safeFilter = function (data, tagString, filterValue) {
         var s = tagString.slice(4,tagString.length-4);
@@ -36,10 +36,11 @@ function init(){
         clusterHasBalloon: true,
         clusterDisableClickZoom: true,
         clusterOpenBalloonOnClick: true,
+        clusterBalloonContentLayout: 'cluster#balloonCarousel',
         // Опции объектов задаются с префиксом geoObject
         geoObjectOpenBalloonOnClick: true,
-        geoObjectHasBalloon: true,
-        geoObjectBalloonContentLayout: MyBalloonContentLayoutClass,
+        geoObjectHasBalloon: true
+        //geoObjectBalloonContentLayout: MyBalloonContentLayoutClass,
     });
     /*var onClickFunction = function (e){
         console.log(e);
