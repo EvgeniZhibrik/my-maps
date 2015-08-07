@@ -143,6 +143,8 @@ $(document).ready(function () {
 				f(json._id);
 		});
 	});
+
+	
 	
 	app.getCurrentPage().insertAfter(app.getNavbar());
 	activateOffcanvas(app.getMainContainer());

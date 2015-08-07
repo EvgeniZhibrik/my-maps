@@ -289,3 +289,26 @@ function validateEmail(email)
     var re = /[^\s@]+@[^\s@]+\.[^\s@]+/;
     return re.test(email);
 }
+
+function openCafePage(id){
+	var app = appState.getInstance();
+	$.ajax({
+		url: "http://localhost:8000/api/v1.0/cafe/"+id+'/',
+		type: "GET",
+		dataType : "json",
+		success: function(json){
+			console.log(json);
+			app.changeData(app.getCafePage());
+			$('#cafe-name').html(json.cafe.name);
+			$('#cafe-rating').html(json.rating);
+			
+		},
+		error: function( xhr, status, errorThrown ) {
+			alert( "Sorry, there was a problem!" );
+			console.log( "Error: " + errorThrown );
+			console.log( "Status: " + status );
+			console.log(xhr);
+			//handleRegistrationError(xhr);
+		}
+	});
+}

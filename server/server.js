@@ -67,16 +67,16 @@ function setBalloonContentBody(doc, photoes){
             '<div class = "col-xs-12 col-sm-4 balloon-photo">'+
                 ((photoes.length)?'<img class="img-responsive img-rounded" src = "'+ im +'"/>' : 'No photo') + 
             '</div>'+
-            '<div class = "col-xs-12 col-sm-8 balloon-description">'+
+            '<div class = "col-xs-12 col-sm-8 balloon-description"><pre>'+
                 doc.description+
-            '</div>'+
+            '</pre></div>'+
         '</div>'+
         '<div class = "row">'+
             '<div class = "col-xs-12 col-sm-4">'+
             '</div>'+
             '<div class = "col-xs-12 col-sm-8">'+
-                '<button class = "btn btn-success" type="button" onclick = "route('+doc._id+')">Route</button>'+
-                '<button class = "btn btn-info" type="button" onclick = "openCafePage('+doc._id+')">Cafe page</button>'+
+                '<button class = "btn btn-success" type="button" onclick = "route(\''+doc._id+'\'")">Route</button>'+
+                '<button class = "btn btn-info" type="button" onclick = "openCafePage(\''+ doc._id +'\')" id = "' + doc._id + '">Cafe page</button>'+
             '</div>'+
         '</div>'+
     '</div>';
@@ -85,13 +85,16 @@ function setBalloonContentBody(doc, photoes){
 }
 
 function setBalloonContentHeader(doc, rank){
-    var s = '<div class = "container-fluid">'+
+    var s = '<div class = "container-fluid balloon-header-container">'+
         '<div class = "row">'+
-            '<div class="col-xs-10 balloon-header">'+
+            '<div class="col-xs-9 col-sm-9 col-md-10 balloon-header">'+
                 '<strong>'+doc.name+'</strong>'+
+                '<hr>'+
             '</div>'+
-            '<div class="col-xs-2 balloon-rating" style="background-color:'+ getRankingColor(rank)+'">'+
-                '<strong>'+rank+'</strong>'+
+            '<div class="col-xs-3 col-sm-3 col-md-2">'+
+                '<div class="balloon-rating" style="background-color:'+ getRankingColor(rank)+';">'+
+                    rank+
+                '</div>'+
             '</div>'+
         '</div>'+
     '</div>';
@@ -108,7 +111,7 @@ function getRankingColor(rank){
     var H = 0, S = 0, V = 0.5;
     if(rank >= 0){
         S = 1;
-        V = 1;
+        V = 0.7;
         H = parseInt(120 * (rank/10.0), 10);
     }
     var C = V*S;
@@ -292,11 +295,9 @@ router.post('/photo/', function(req, res){
 });
 
 router.get('/cafe/', function(req, res){
-    console.log('GET cafe ' + req.query);
     var arr = req.query.bbox.split(',').map(function(cur){
         return parseFloat(cur);
     });
-    console.log(arr);
     CafeModel.find({
         'coordinates.latitude': {$gt: arr[0], $lt: arr[2]},
         'coordinates.longitude': {$gt: arr[1], $lt: arr[3]},
@@ -343,10 +344,31 @@ router.get('/cafe/', function(req, res){
                     });
                 }
             }, function(){
-                console.log(obj.features);
                 res.jsonp(obj);
             });
             f();
+        }
+    });
+});
+
+router.get('/cafe/:id/', function (req, res){
+    console.log('GET cafe ' + req.params.id);
+    CafeModel.findOne({_id: req.params.id}, function(err, result_cafe){
+        if (err)
+            res.status(err.status).send(err);
+        else {
+            FotoModel.find({cafeID: req.params.id},function(err, result_photos){
+                if (err)
+                    res.status(err.status).send(err);
+                else {
+                    var newObj = {
+                        cafe: result_cafe,
+                        photos: result_photos,
+                        rating: Math.round((Math.random()*10)*10)/10.0
+                    };
+                    res.json(newObj);
+                }
+            });
         }
     });
 });

@@ -21,6 +21,12 @@
   height: 100%;
 }
 
+
+#data{
+  overflow-y: auto;
+}
+
+
 #map-container{
   border-radius: 15px;
   border-style: solid;

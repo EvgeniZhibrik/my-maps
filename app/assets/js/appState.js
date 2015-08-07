@@ -8,10 +8,13 @@ var appState = (function () {
 		var mainContainer =  $(links.eq(1).get(0).import.getElementById('main-container'));
 		var registerCafeForm = $(links.eq(3).get(0).import.getElementById('register-cafe-form'));
 		var registerSentPhoto = $(links.eq(4).get(0).import.getElementById('register-sent-photo').innerHTML);
+		var mapContainer = mainContainer.find('#map-container');
+		var cafePage = $(links.eq(5).get(0).import.getElementById('cafe-page'));
 		var user;
 		var avatar;
 		var photoes;
 		var currentPage = loginForm;
+		var currentData = mapContainer;
 		function privateMethod(){
 			console.log( "I am private" );
 		}
@@ -26,6 +29,13 @@ var appState = (function () {
 					}
 				};
 			})(navbar),
+			changeData: function(newData){
+				if(currentPage === mainContainer){
+					currentData.detach();
+					$('#data').append(newData);
+					currentData = newData;
+				}
+			},
 			getNavbar: function(){
 				return navbar;
 			},
@@ -52,6 +62,15 @@ var appState = (function () {
 			},
 			getPhotoes: function(){
 				return photoes;
+			},
+			getMapContainer: function(){
+				return mapContainer;
+			},
+			getCafePage: function(){
+				return cafePage;
+			},
+			getCurrentData: function(){
+				return currentData;
 			},
 			setUser: function(obj){
 				user = obj;
