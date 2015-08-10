@@ -299,9 +299,8 @@ function openCafePage(id){
 		success: function(json){
 			console.log(json);
 			app.changeData(app.getCafePage());
-			$('#cafe-name').html(json.cafe.name);
-			$('#cafe-rating').html(json.rating);
-			
+			showCafePhotoes(json.photoes);
+			showCafeInfo(json.cafe, json.rating);		
 		},
 		error: function( xhr, status, errorThrown ) {
 			alert( "Sorry, there was a problem!" );
@@ -311,4 +310,28 @@ function openCafePage(id){
 			//handleRegistrationError(xhr);
 		}
 	});
+}
+
+function showCafePhotoes(photoes){
+	if(!photoes || !photoes.length){
+		$('#myCarousel').hide();
+	}
+	else {
+		var car = $('#myCarousel');
+		var inn = car.find('.carousel-inner');
+		for(var i = 0; i < photoes.length; i++){
+			inn.append($('<div class="item">' +
+							'<img class="img-responsive img-rounded" src="' + photoes[i].url + '" alt="slide #' + i + '" id = "' + photoes[i]._id + '">' +
+						'</div>'));
+		}
+		inn.find('.item').eq(0).addClass('active');
+	}
+}
+
+function showCafeInfo(cafe, rating){
+	$('#cafe-name').html(cafe.name);
+	$('#cafe-rating').html(rating.value);
+	$('#cafe-rating').css('background-color', rating.color);
+	$('#cafe-description').html(cafe.description);
+	
 }

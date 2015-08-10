@@ -67,9 +67,9 @@ function setBalloonContentBody(doc, photoes){
             '<div class = "col-xs-12 col-sm-4 balloon-photo">'+
                 ((photoes.length)?'<img class="img-responsive img-rounded" src = "'+ im +'"/>' : 'No photo') + 
             '</div>'+
-            '<div class = "col-xs-12 col-sm-8 balloon-description"><pre>'+
+            '<div class = "col-xs-12 col-sm-8 balloon-description">'+
                 doc.description+
-            '</pre></div>'+
+            '</div>'+
         '</div>'+
         '<div class = "row">'+
             '<div class = "col-xs-12 col-sm-4">'+
@@ -147,11 +147,7 @@ var router = express.Router();
 router.get('/upload_tag/', function(req, res){
     console.log('GET upload tag');
     var s = cloudinary.uploader.image_upload_tag('image_id',{ 
-        disableImageResize: false,
-        imageMaxWidth: 1000,
-        imageMaxHeight: 1000,
-        acceptFileTypes: /(\.|\/)(gif|jpe?g|png|bmp|ico)$/i,
-        maxFileSize: 5000000 // 5MB 
+        disableImageResize: false, 
     });
     console.log("response: "+s);
     res.json({tag: s});
@@ -331,7 +327,7 @@ router.get('/cafe/', function(req, res){
                                 properties: {
                                     cafe: cur,
                                     comments: [],
-                                    photos: ar,
+                                    photoes: ar,
                                     commentsTag:'',
                                     //clusterCaption: cur.name,
                                     balloonContentBody: setBalloonContentBody(cur, result),
@@ -357,14 +353,32 @@ router.get('/cafe/:id/', function (req, res){
         if (err)
             res.status(err.status).send(err);
         else {
-            FotoModel.find({cafeID: req.params.id},function(err, result_photos){
+            FotoModel.find({cafeID: req.params.id},function(err, result_photoes){
                 if (err)
                     res.status(err.status).send(err);
                 else {
+                    var arr = result_photoes.map(function(cur){
+                        return {
+                            _id: cur._id,
+                            title: cur.title,
+                            description: cur.description,
+                            publishedBy: cur.publishedBy,
+                            published: cur.published,
+                            url: cloudinary.url(cur.link, {
+                                crop: 'fit',
+                                width: 480,
+                                height: 360
+                            })
+                        };
+                    });
+                    var r = Math.round((Math.random()*10)*10)/10.0;
                     var newObj = {
                         cafe: result_cafe,
-                        photos: result_photos,
-                        rating: Math.round((Math.random()*10)*10)/10.0
+                        photoes: arr,
+                        rating: {
+                            value: r,
+                            color: getRankingColor(r)
+                        }
                     };
                     res.json(newObj);
                 }

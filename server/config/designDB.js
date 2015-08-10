@@ -34,8 +34,8 @@ module.exports = function (mongoose){
         ),
 
         fotoSchema: new mongoose.Schema({
-                description: { type: String, trim: true },
-                title: { type: String, trim: true },
+                description: { type: String, trim: true, default:'' },
+                title: { type: String, trim: true, default:'' },
                 cafeID: { type: mongoose.Schema.Types.ObjectId },
                 publishedBy: {type: mongoose.Schema.Types.ObjectId},
                 published: { type: Date },

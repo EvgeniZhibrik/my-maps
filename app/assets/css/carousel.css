@@ -15,28 +15,43 @@
 .carousel-caption {
   position: static;
   z-index: 10;
+  margin-right: 10%;
+  margin-left: 10%;
+  overflow: hidden;
 }
 
 /* Declare heights because of positioning of img element */
 .carousel .item {
-  background-color: #777;
+  background-color: white;
 }
 .carousel-inner > .item > img {
+  margin-left: auto;
+  margin-right: auto;
+  max-height: 360px;
 }
 
+#cafe-name {
+  font-size: 20px;
+}
 
-@media (min-width: 768px) {
- /* Bump up size of carousel content */
-  .carousel-caption p {
-    margin-bottom: 20px;
-  }
+#cafe-rating {
+  height: 40px;
+  width: 40px;
+  padding: 0;
+  text-align: center;
+  float: right;
+  font-size: 24px;
+  color: white;
+  border-radius: 4px;
+}
 
+#cafe-description{
+  background-color: white;
 }
 
 @media (max-width: 768px) {
 
   #cafe-page{
-    background-color: white;
     border-radius: 0;
     border-width: 0;
     height: 100%;

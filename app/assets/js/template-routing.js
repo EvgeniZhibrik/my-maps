@@ -123,8 +123,8 @@ $(document).ready(function () {
 			return function(id){
 				
 				var newPhoto = {
-					title: $('input .'+ curr).val(),
-					description: $('textarea .' + curr).val(),
+					title: $('input.'+ curr).val(),
+					description: $('textarea.' + curr).val(),
 					cafeID: id,
 					publishedBy: app.getUser()._id,
 					published: new Date(),
