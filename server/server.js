@@ -305,7 +305,7 @@ router.get('/cafe/', function(req, res){
             var obj = {
                 "type": "FeatureCollection",
                 "features": []
-            }
+            };
             var f = result.reduceRight(function(prev, cur, ind, arr){
                 //var photoes = FotoModel.find({});
                 return function (){
@@ -338,7 +338,7 @@ router.get('/cafe/', function(req, res){
                             prev();
                         }
                     });
-                }
+                };
             }, function(){
                 res.jsonp(obj);
             });
@@ -386,6 +386,7 @@ router.get('/cafe/:id/', function (req, res){
         }
     });
 });
+
 
 
 app.use('/api/v1.0', router);

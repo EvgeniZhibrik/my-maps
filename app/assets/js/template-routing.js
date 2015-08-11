@@ -136,12 +136,18 @@ $(document).ready(function () {
 				});
 			};
 		}, function(){
+			closeMap();
+			init();
 			app.changePage(app.getMainContainer());
 		});
 		registerCafe(newCafe, function(json){
 				console.log(json);
 				f(json._id);
 		});
+	});
+
+	app.getMainContainer().find('#map-menu-button').click(function(e){
+		app.changeData(app.getMapContainer());
 	});
 
 	

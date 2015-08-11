@@ -17,18 +17,13 @@ function getUploadTag(callback){
 }
 
 function cleanLoginForm(){
-	$('#input-email').val('').parents('.has-feedback').removeClass('has-error').removeClass('has-success');
-	$('#input-password').val('').parents('.has-feedback').removeClass('has-success');
-	$('#sign-in').attr('disabled', 'disabled');
 }
 
 function cleanMainContainer(){
-	$('#additional-user-info').html('');
+	
 }
 
 function cleanRegistrationForm(){
-	$('.form-control').val('');
-	$('.upload-form').html('');
 }
 
 function registerFormValid(){
@@ -46,8 +41,6 @@ function registerFormValid(){
 	}
 
 function cleanRegisterCafeForm(){
-	$('.form-control').val('');
-	$('.upload-form').html('');
 }
 
 
@@ -228,23 +221,6 @@ function setupUploadInput(tag, uplForm, app){
 	});
 }
 
-/*function getCafe(callback){
-	$.ajax({
-		url: "http://localhost:8000/api/v1.0/cafe/",
-		type: "GET",
-		dataType : "json",
-		success: function(json){
-			callback && callback(json);
-		},
-		error: function( xhr, status, errorThrown ) {
-			alert( "Sorry, there was a problem!" );
-			console.log( "Error: " + errorThrown );
-			console.log( "Status: " + status );
-			console.log(xhr);
-			//handleRegistrationError(xhr);
-		}
-	});
-}*/
 
 function registerCafe(newCafe,callback){
 	$.ajax({

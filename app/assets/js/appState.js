@@ -15,14 +15,41 @@ var appState = (function () {
 		var photoes;
 		var currentPage = loginForm;
 		var currentData = mapContainer;
-		function privateMethod(){
-			console.log( "I am private" );
+		function clearData() {
+			if (currentPage === mainContainer && currentData === cafePage){
+				currentPage.find('.slide').removeClass('slide');
+				currentData.find('.carousel-inner').html('');
+				currentData.find('#cafe-name').html('');
+				currentData.find('#cafe-rating').html('');
+				currentData.find('#cafe-description').html('');
+			}
 		}
-		var privateVariable = "Im also private";
+
+		function clearPage() {
+			clearData();
+			if(currentPage === loginForm){
+				currentPage.find('#input-email').val('').parents('.has-feedback').removeClass('has-error').removeClass('has-success');
+				currentPage.find('#input-password').val('').parents('.has-feedback').removeClass('has-success');
+				currentPage.find('#sign-in').attr('disabled', 'disabled');
+			}
+			else if (currentPage === registrationForm){
+				currentPage.find('.form-control').val('');
+				currentPage.find('.upload-form').html('');
+			}
+			else if (currentPage === mainContainer){
+				currentPage.find('#additional-user-info').html('');
+			}
+			else if (currentPage === registerCafeForm){
+				currentPage.find('.form-control').val('');
+				currentPage.find('.upload-form').html('');
+			}
+		}
+		
 		return {
 			changePage: (function (navb){
 				return function (newPage) {
 					if(currentPage != newPage){
+						clearPage();
 						currentPage.detach();
 						newPage.insertAfter(navb);
 						currentPage = newPage;
@@ -30,10 +57,14 @@ var appState = (function () {
 				};
 			})(navbar),
 			changeData: function(newData){
-				if(currentPage === mainContainer){
+				if(currentPage === mainContainer && currentData !== newData){
+					clearData();
 					currentData.detach();
 					$('#data').append(newData);
 					currentData = newData;
+				}
+				if(newData === cafePage){
+					currentData.find('#myCarousel').addClass('slide');
 				}
 			},
 			getNavbar: function(){
