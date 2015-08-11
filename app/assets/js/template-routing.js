@@ -3,7 +3,6 @@ $(document).ready(function () {
 	app.getNavbar().find('#exit').click(function(){
 		if(app.getUser()){
 			logout({email: app.getUser().email}, function(json){
-				cleanMainContainer();
 				app.setUser(null);
 				console.log(json);
 				app.changePage(app.getLoginForm());
@@ -37,7 +36,6 @@ $(document).ready(function () {
 	
 	app.getLoginForm().find('#sign-in').click(function(){
 		login ($('#input-email').val(), $('#input-password').val(), function(json){
-			cleanLoginForm();
 			app.changePage(app.getMainContainer());
 			app.setUser(json);
 			setUserData(app.getUser());
@@ -89,7 +87,6 @@ $(document).ready(function () {
 	});
 
 	app.getRegistrationForm().find('#reg-cancel').click(function(e){
-		cleanRegistrationForm();
 		app.changePage(app.getLoginForm());
 	});
 
@@ -102,7 +99,6 @@ $(document).ready(function () {
 	});
 	
 	app.getRegisterCafeForm().find('#reg-cafe-cancel').click(function(e){
-		cleanRegisterCafeForm();
 		app.changePage(app.getMainContainer());
 	});
 

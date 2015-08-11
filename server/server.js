@@ -365,7 +365,7 @@ router.get('/cafe/:id/', function (req, res){
                             publishedBy: cur.publishedBy,
                             published: cur.published,
                             url: cloudinary.url(cur.link, {
-                                crop: 'fit',
+                                crop: 'fill',
                                 width: 480,
                                 height: 360
                             })

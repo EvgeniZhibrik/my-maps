@@ -16,32 +16,20 @@ function getUploadTag(callback){
 	});
 }
 
-function cleanLoginForm(){
-}
-
-function cleanMainContainer(){
-	
-}
-
-function cleanRegistrationForm(){
-}
-
 function registerFormValid(){
-		var inp = $('.form-control');
-		inp.each(function(ind, elem){
-			if(!$(elem).val())
-				return 1;
-		});
-		if($('#reg-email1').val() != $('#reg-email2').val())
-			return 2;
-		if($('#reg-password1').val() != $('#reg-password2').val())
-			return 3;
-		return 0;
+	var inp = $('.form-control');
+	inp.each(function(ind, elem){
+		if(!$(elem).val())
+			return 1;
+	});
+	if($('#reg-email1').val() != $('#reg-email2').val())
+		return 2;
+	if($('#reg-password1').val() != $('#reg-password2').val())
+		return 3;
+	return 0;
 
-	}
-
-function cleanRegisterCafeForm(){
 }
+
 
 
 function login(username, password, callback) {
