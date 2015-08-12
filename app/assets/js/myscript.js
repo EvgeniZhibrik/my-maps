@@ -257,14 +257,14 @@ function validateEmail(email)
 function openCafePage(id){
 	var app = appState.getInstance();
 	$.ajax({
-		url: "http://localhost:8000/api/v1.0/cafe/"+id+'/',
+		url: 'http://localhost:8000/api/v1.0/'+app.getUser()._id+'/cafe/'+id+'/',
 		type: "GET",
 		dataType : "json",
 		success: function(json){
 			console.log(json);
 			app.changeData(app.getCafePage());
 			showCafePhotoes(json.photoes);
-			showCafeInfo(json.cafe, json.rating);		
+			showCafeInfo(json.cafe, json.rating, json.subscribed);		
 		},
 		error: function( xhr, status, errorThrown ) {
 			alert( "Sorry, there was a problem!" );
@@ -292,10 +292,18 @@ function showCafePhotoes(photoes){
 	}
 }
 
-function showCafeInfo(cafe, rating){
+function showCafeInfo(cafe, rating, subscribed){
 	$('#cafe-name').html(cafe.name);
 	$('#cafe-rating').html(rating.value);
 	$('#cafe-rating').css('background-color', rating.color);
 	$('#cafe-description').html(cafe.description);
+	if(subscribed){
+		$('#cafe-add-places').hide();
+		$('#cafe-remove-places').show();
+	}
+	else {
+		$('#cafe-add-places').show();
+		$('#cafe-remove-places').hide();
+	}
 	
 }

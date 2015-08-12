@@ -23,6 +23,10 @@ var appState = (function () {
 				currentData.find('#cafe-rating').html('');
 				currentData.find('#cafe-description').html('');
 			}
+			else if (currentPage === mainContainer && currentData === mapContainer){
+				closeMap();
+				initMap();
+			}
 		}
 
 		function clearPage() {
@@ -57,6 +61,7 @@ var appState = (function () {
 				};
 			})(navbar),
 			changeData: function(newData){
+
 				if(currentPage === mainContainer && currentData !== newData){
 					clearData();
 					currentData.detach();

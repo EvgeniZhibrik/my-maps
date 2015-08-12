@@ -49,6 +49,7 @@ module.exports = function (mongoose){
         cafeCommentSchema: new mongoose.Schema({
                 userID: { type: mongoose.Schema.Types.ObjectId },
                 cafeID: { type: mongoose.Schema.Types.ObjectId },
+                type: { type: String, trim: true},
                 text: { type: String, trim: true},
                 date: { type: Date }
             },

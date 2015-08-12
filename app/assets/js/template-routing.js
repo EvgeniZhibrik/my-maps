@@ -5,6 +5,8 @@ $(document).ready(function () {
 			logout({email: app.getUser().email}, function(json){
 				app.setUser(null);
 				console.log(json);
+				closeMap();
+				initMap();
 				app.changePage(app.getLoginForm());
 			});
 		}
@@ -37,6 +39,7 @@ $(document).ready(function () {
 	app.getLoginForm().find('#sign-in').click(function(){
 		login ($('#input-email').val(), $('#input-password').val(), function(json){
 			app.changePage(app.getMainContainer());
+			app.changeData(app.getMapContainer());
 			app.setUser(json);
 			setUserData(app.getUser());
 		});
@@ -79,6 +82,7 @@ $(document).ready(function () {
 				console.log(json);
 				login (json.email, json.password, function(json){
 					app.changePage(app.getMainContainer());
+					app.changeData(app.getMapContainer());
 					app.setUser(json);
 					setUserData(app.getUser());
 				});
@@ -100,6 +104,8 @@ $(document).ready(function () {
 	
 	app.getRegisterCafeForm().find('#reg-cafe-cancel').click(function(e){
 		app.changePage(app.getMainContainer());
+		app.changeData(app.getMapContainer());
+		
 	});
 
 	app.getRegisterCafeForm().find('#register-cafe').click(function(e){
@@ -133,8 +139,9 @@ $(document).ready(function () {
 			};
 		}, function(){
 			closeMap();
-			init();
+			initMap();
 			app.changePage(app.getMainContainer());
+			app.changeData(app.getMapContainer());
 		});
 		registerCafe(newCafe, function(json){
 				console.log(json);

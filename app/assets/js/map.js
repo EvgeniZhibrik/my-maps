@@ -2,8 +2,8 @@ var myMap;
 var mapCenter = [53.901090 , 27.558759];
 var mapZoom = 18;
 
-function init(){ 
-	myInt = setInterval(function(){
+function initMap(){ 
+	var myInt = setInterval(function(){
 		if($('#map-container').length){
 			myMap = new ymaps.Map("map-container", {
        			center: mapCenter,
@@ -41,4 +41,4 @@ function closeMap(){
 
 
 
-ymaps.ready(init);
+ymaps.ready(initMap);

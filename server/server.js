@@ -347,13 +347,13 @@ router.get('/cafe/', function(req, res){
     });
 });
 
-router.get('/cafe/:id/', function (req, res){
-    console.log('GET cafe ' + req.params.id);
-    CafeModel.findOne({_id: req.params.id}, function(err, result_cafe){
+router.get('/:user_id/cafe/:cafe_id/', function (req, res){
+    console.log('GET cafe ' + req.params.cafe_id);
+    CafeModel.findOne({_id: req.params.cafe_id}, function(err, result_cafe){
         if (err)
             res.status(err.status).send(err);
         else {
-            FotoModel.find({cafeID: req.params.id},function(err, result_photoes){
+            FotoModel.find({cafeID: req.params.cafe_id},function(err, result_photoes){
                 if (err)
                     res.status(err.status).send(err);
                 else {
@@ -371,16 +371,24 @@ router.get('/cafe/:id/', function (req, res){
                             })
                         };
                     });
-                    var r = Math.round((Math.random()*10)*10)/10.0;
-                    var newObj = {
-                        cafe: result_cafe,
-                        photoes: arr,
-                        rating: {
-                            value: r,
-                            color: getRankingColor(r)
+                    FavoritesModel.findOne({userID: req.params.user_id , cafeID: req.params.cafe_id}, function(err, result_favor){
+                        if(err)
+                            res.status(err.status).send(err);
+                        else {
+                            var r = Math.round((Math.random()*10)*10)/10.0;
+                            var newObj = {
+                                cafe: result_cafe,
+                                photoes: arr,
+                                rating: {
+                                    value: r,
+                                    color: getRankingColor(r)
+                                },
+                                subscribed: !!result_favor
+                            };
+                            res.json(newObj);
                         }
-                    };
-                    res.json(newObj);
+                    });
+                    
                 }
             });
         }
