@@ -10,6 +10,26 @@
   overflow-y:auto;
 }
 
+#cafe-comments{
+  padding: 0;
+}
+
+.rating-sign{
+  font-size: 10px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.btn-comments{
+  margin: 0;
+  width: 100%;
+  background-color: transparent;
+}
+
+.panel-heading{
+  padding: 0;
+}
+
 .btn-subscribe{
   margin-bottom: 10px;
 }
@@ -39,7 +59,7 @@
   font-size: 20px;
 }
 
-#cafe-rating {
+.cafe-rating {
   height: 40px;
   width: 40px;
   padding: 0;
@@ -48,6 +68,7 @@
   font-size: 24px;
   color: white;
   border-radius: 4px;
+  margin-top: 5px;
 }
 
 #cafe-description{

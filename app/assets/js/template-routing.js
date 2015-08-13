@@ -151,6 +151,7 @@ $(document).ready(function () {
 
 	app.getMainContainer().find('#map-menu-button').click(function(e){
 		app.changeData(app.getMapContainer());
+		$('.row-offcanvas').removeClass('active1').removeClass('active2');
 	});
 
 	

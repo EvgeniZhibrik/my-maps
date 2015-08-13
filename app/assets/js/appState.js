@@ -10,6 +10,7 @@ var appState = (function () {
 		var registerSentPhoto = $(links.eq(4).get(0).import.getElementById('register-sent-photo').innerHTML);
 		var mapContainer = mainContainer.find('#map-container');
 		var cafePage = $(links.eq(5).get(0).import.getElementById('cafe-page'));
+		var comment = $(links.eq(6).get(0).import.getElementById('comment'));
 		var user;
 		var avatar;
 		var photoes;
@@ -107,6 +108,9 @@ var appState = (function () {
 			},
 			getCurrentData: function(){
 				return currentData;
+			},
+			getComment: function(){
+				return comment;
 			},
 			setUser: function(obj){
 				user = obj;

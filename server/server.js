@@ -347,48 +347,130 @@ router.get('/cafe/', function(req, res){
     });
 });
 
+router.get('/cafe/:cafe_id/photo/', function(req, res){
+    console.log('GET photoes'+ req.params.cafe_id);
+    FotoModel.find({cafeID: req.params.cafe_id},function(err, result_photoes){
+        if (err)
+            res.status(err.status).send(err);
+        else {
+            var arr = result_photoes.map(function(cur){
+                return {
+                    _id: cur._id,
+                    title: cur.title,
+                    description: cur.description,
+                    publishedBy: cur.publishedBy,
+                    published: cur.published,
+                    url: cloudinary.url(cur.link, {
+                        crop: 'fill',
+                        width: 480,
+                        height: 360
+                    })
+                };
+            });
+            res.json(arr);   
+        }
+    });
+});
+
+router.get('/cafe/:cafe_id/comment/', function (req, res){
+    console.log('GET comments' + req.params.cafe_id;
+    CafeCommentModel.find({cafeID: req.params.cafe_id}, function(err, result_comments){
+        if(err)
+            res.status(err.status).send(err);
+        else {
+            var ar = [];
+            var f = result_comments.reduceRight(function(prev, cur, ind, arr){
+                return function (){
+                    UserModel.findOne({_id: cur.userID},function(err, result_user){
+                        if(err)
+                            res.status(err.status).send(err);
+                        else {
+                            RankingModel.findOne({category : 'overall'}, function(err, result_category){
+                                if(err)
+                                    res.status(err.status).send(err);
+                                else {
+                                    MarksModel.findOne({userID: cur.userID, cafeID: req.params.cafe_id, category: result_category._id}, function(err, result_mark){
+                                        var newObj = {
+                                            comment: cur,
+                                            user: result_user,
+                                            mark: result_mark
+                                        };
+                                        ar.push(newObj);
+                                        prev();
+                                    });
+                                }
+                            });
+                        }
+                    });    
+                };
+                
+            }, function(){
+                console.log(ar);
+                res.json(ar);
+            });
+            f();
+        }
+    });
+});
+
+router.post('/cafe/:cafe_id/comment/', function (req, res){
+    console.log('POST comment ' + req.body);
+    var newObj = new CafeCommentModel(req.body);
+    newObj.save(function(err){
+        if(err)
+            res.status(err.status).send(err);
+        else {
+            res.json(newObj);
+        }
+    });
+});
+
 router.get('/:user_id/cafe/:cafe_id/', function (req, res){
     console.log('GET cafe ' + req.params.cafe_id);
     CafeModel.findOne({_id: req.params.cafe_id}, function(err, result_cafe){
         if (err)
             res.status(err.status).send(err);
         else {
-            FotoModel.find({cafeID: req.params.cafe_id},function(err, result_photoes){
-                if (err)
+            FavoritesModel.findOne({userID: req.params.user_id , cafeID: req.params.cafe_id}, function(err, result_favor){
+                if(err)
                     res.status(err.status).send(err);
                 else {
-                    var arr = result_photoes.map(function(cur){
-                        return {
-                            _id: cur._id,
-                            title: cur.title,
-                            description: cur.description,
-                            publishedBy: cur.publishedBy,
-                            published: cur.published,
-                            url: cloudinary.url(cur.link, {
-                                crop: 'fill',
-                                width: 480,
-                                height: 360
-                            })
-                        };
-                    });
-                    FavoritesModel.findOne({userID: req.params.user_id , cafeID: req.params.cafe_id}, function(err, result_favor){
+                    RankingModel.findOne({category : 'overall'}, function(err, result_category){
                         if(err)
                             res.status(err.status).send(err);
                         else {
-                            var r = Math.round((Math.random()*10)*10)/10.0;
-                            var newObj = {
-                                cafe: result_cafe,
-                                photoes: arr,
-                                rating: {
-                                    value: r,
-                                    color: getRankingColor(r)
-                                },
-                                subscribed: !!result_favor
-                            };
-                            res.json(newObj);
+                            MarksModel.findOne({userID: req.params.user_id, cafeID: req.params.cafe_id, category: result_category._id}, function(err, result_mark){
+                                if(err)
+                                    res.status(err.status).send(err);
+                                else {
+                                    MarksModel.find({cafeID: req.params.cafe_id, category: result_category._id}, function(err, result_marks){
+                                        if(err)
+                                            res.status(err.status).send(err);
+                                        else {
+                                            var r;
+                                            if(result_marks){
+                                                r = 0;
+                                                for(var i = 0; i < result_marks.length; i++){
+                                                    r+=result_marks[i].mark;
+                                                }
+                                                r/=result_marks.length;
+                                                r = Math.round(r*10)/10.0;
+                                            }
+                                            r = (r) ? r : -1;
+                                            var mark = (result_mark) ? result_mark.mark : -1;
+                                            var newObj = {
+                                                cafe: result_cafe,
+                                                rating: { value: r, color: getRankingColor(r) },
+                                                yourRating: { value: mark, color: getRankingColor(mark) },
+                                                subscribed: !!result_favor,
+                                            };
+                                            res.json(newObj);
+                                        } 
+                                    });
+                                }    
+                            });
                         }
                     });
-                    
                 }
             });
         }

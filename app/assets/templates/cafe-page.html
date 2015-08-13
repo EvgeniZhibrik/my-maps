@@ -3,14 +3,18 @@
 		<div class="col-xs-9 col-sm-10" id = "cafe-name">
 		</div>
 		<div class="col-xs-3 col-sm-2">
-			<div class="" id="cafe-rating">
-			</div> 
+			
+			<div class="cafe-rating" id="cafe-rating">
+			</div>
+				
 		</div>
 	</div>
 	<div class = "row">
 		<div class="col-xs-12">
 			<button type="button" class="btn btn-info btn-xs btn-subscribe" id="cafe-add-places">Subscribe</button>
 			<button type="button" class="btn btn-primary btn-xs btn-subscribe" id="cafe-remove-places">Unsubscribe</button>
+			<div class="cafe-rating" id="your-rating">
+			</div>
 		</div>
 	</div>
 	<div class = "row">
@@ -37,7 +41,20 @@
 	
 	<div class = "row">
 		<div class = "col-xs-12" id="cafe-comments">
+			<div class="panel panel-default">
+				<div class="panel-heading" role="tab" id="headingOne">
+					<h4 class="panel-title">
+						<button aria-controls="collapseOne" class="btn btn-comments" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="false">
+							Comments
+						</button>
+					</h4>
+				</div>
+				<div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+					<div class="panel-body" id="comments">
 
+					</div>
+				</div>
+			</div>
 		</div>
 		
 	</div>

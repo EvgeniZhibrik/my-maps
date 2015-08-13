@@ -263,8 +263,47 @@ function openCafePage(id){
 		success: function(json){
 			console.log(json);
 			app.changeData(app.getCafePage());
-			showCafePhotoes(json.photoes);
-			showCafeInfo(json.cafe, json.rating, json.subscribed);		
+			showCafeInfo(json.cafe, json.rating, json.subscribed, json.yourRating);
+			getPhotoes(json.cafe._id, showCafePhotoes);
+			getComments(json.cafe._id, showCafeComments);		
+		},
+		error: function( xhr, status, errorThrown ) {
+			alert( "Sorry, there was a problem!" );
+			console.log( "Error: " + errorThrown );
+			console.log( "Status: " + status );
+			console.log(xhr);
+			//handleRegistrationError(xhr);
+		}
+	});
+}
+
+function getPhotoes(id, callback){
+	$.ajax({
+		url: 'http://localhost:8000/api/v1.0/cafe/'+id+'/photo/',
+		type: "GET",
+		dataType : "json",
+		success: function(json){
+			console.log(json);
+			callback && callback(json);		
+		},
+		error: function( xhr, status, errorThrown ) {
+			alert( "Sorry, there was a problem!" );
+			console.log( "Error: " + errorThrown );
+			console.log( "Status: " + status );
+			console.log(xhr);
+			//handleRegistrationError(xhr);
+		}
+	});
+}
+
+function getComments(id, callback){
+	$.ajax({
+		url: 'http://localhost:8000/api/v1.0/cafe/'+id+'/comment/',
+		type: "GET",
+		dataType : "json",
+		success: function(json){
+			console.log(json);
+			callback && callback(json);		
 		},
 		error: function( xhr, status, errorThrown ) {
 			alert( "Sorry, there was a problem!" );
@@ -292,10 +331,22 @@ function showCafePhotoes(photoes){
 	}
 }
 
-function showCafeInfo(cafe, rating, subscribed){
+function showCafeComments(comments){
+	var com = $('#comments');
+}
+
+function showCafeInfo(cafe, rating, subscribed, yourRating){
 	$('#cafe-name').html(cafe.name);
-	$('#cafe-rating').html(rating.value);
+	if(rating.value >= 0)
+		$('#cafe-rating').html(rating.value);
+	else
+		$('#cafe-rating').html('NO');
 	$('#cafe-rating').css('background-color', rating.color);
+	if(yourRating.value >= 0)
+		$('#your-rating').show().html(yourRating.value);
+	else
+		$('#your-rating').hide();
+	$('#your-rating').css('background-color', yourRating.color);
 	$('#cafe-description').html(cafe.description);
 	if(subscribed){
 		$('#cafe-add-places').hide();
@@ -305,5 +356,6 @@ function showCafeInfo(cafe, rating, subscribed){
 		$('#cafe-add-places').show();
 		$('#cafe-remove-places').hide();
 	}
-	
+	$('#cafe-add-places').attr('cafe-id', cafe._id);
+	$('#cafe-remove-places').attr('cafe-id', cafe._id);
 }
