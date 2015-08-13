@@ -22,7 +22,13 @@
 
 .btn-comments{
   margin: 0;
-  width: 100%;
+  width: 77%;
+  background-color: transparent;
+}
+
+.btn-add-comment{
+  margin: 0;
+  width: 20%;
   background-color: transparent;
 }
 

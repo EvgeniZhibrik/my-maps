@@ -373,7 +373,7 @@ router.get('/cafe/:cafe_id/photo/', function(req, res){
 });
 
 router.get('/cafe/:cafe_id/comment/', function (req, res){
-    console.log('GET comments' + req.params.cafe_id;
+    console.log('GET comments' + req.params.cafe_id);
     CafeCommentModel.find({cafeID: req.params.cafe_id}, function(err, result_comments){
         if(err)
             res.status(err.status).send(err);
