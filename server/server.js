@@ -425,6 +425,29 @@ router.post('/cafe/:cafe_id/comment/', function (req, res){
     });
 });
 
+router.post('/cafe/:cafe_id/mark/:category/', function(req, res){
+    console.log('POST mark' + req.params.category + ' ' + req.params.cafe_id + ' ' + req.body);
+    RankingModel.findOne({category: req.params.category}, function(err, result_category){
+        if(err)
+            res.status(err.status).send(err);
+        else {
+            var nm = {
+                userID: req.body.userID,
+                cafeID: req.params.cafe_id,
+                mark: parseInt(req.body.mark),
+                category: result_category._id
+            };
+            var newMark = new MarksModel(nm);
+            newMark.save(function(err){
+                if(err)
+                    res.status(err.status).send(err);
+                else
+                    res.json(newMark);
+            });
+        }
+    });
+});
+
 router.get('/:user_id/cafe/:cafe_id/', function (req, res){
     console.log('GET cafe ' + req.params.cafe_id);
     CafeModel.findOne({_id: req.params.cafe_id}, function(err, result_cafe){

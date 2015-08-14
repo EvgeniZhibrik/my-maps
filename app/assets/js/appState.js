@@ -10,7 +10,7 @@ var appState = (function () {
 		var registerSentPhoto = $(links.eq(4).get(0).import.getElementById('register-sent-photo').innerHTML);
 		var mapContainer = mainContainer.find('#map-container');
 		var cafePage = $(links.eq(5).get(0).import.getElementById('cafe-page'));
-		var comment = $(links.eq(6).get(0).import.getElementById('comment'));
+		var comment = $(links.eq(6).get(0).import.getElementsByClassName('comment')[0]);
 		var user;
 		var avatar;
 		var photoes;
@@ -23,6 +23,7 @@ var appState = (function () {
 				currentData.find('#cafe-name').html('');
 				currentData.find('#cafe-rating').html('');
 				currentData.find('#cafe-description').html('');
+				currentData.find('#comments').html('');
 			}
 			else if (currentPage === mainContainer && currentData === mapContainer){
 				closeMap();

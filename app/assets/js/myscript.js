@@ -30,7 +30,26 @@ function registerFormValid(){
 
 }
 
-
+function validateInputForm(th){
+	if($(th).attr('id') == 'input-email') {
+		if(validateEmail($(th).val()))
+			$(th).parents('.has-feedback').removeClass('has-error').addClass('has-success');
+		else if(!($(th).val()) || $(th).val() === "")
+			$(th).parents('.has-feedback').removeClass('has-error').removeClass('has-success');
+		else
+			$(th).parents('.has-feedback').addClass('has-error').removeClass('has-success');
+	}
+	else if ($(th).attr('id') == 'input-password') {
+		if(!($(th).val()) || $(th).val() === "")
+			$(th).parents('.has-feedback').removeClass('has-success');
+		else
+			$(th).parents('.has-feedback').addClass('has-success');
+	}
+	if($('.has-success').length == 2)
+			$('#sign-in').removeAttr('disabled');
+		else
+			$('#sign-in').attr('disabled', 'disabled');
+}
 
 function login(username, password, callback) {
 	$.ajax({
@@ -265,7 +284,7 @@ function openCafePage(id){
 			app.changeData(app.getCafePage());
 			showCafeInfo(json.cafe, json.rating, json.subscribed, json.yourRating);
 			getPhotoes(json.cafe._id, showCafePhotoes);
-			getComments(json.cafe._id, showCafeComments);		
+			getComments(json.cafe._id, addCafeComments);		
 		},
 		error: function( xhr, status, errorThrown ) {
 			alert( "Sorry, there was a problem!" );
@@ -284,7 +303,7 @@ function getPhotoes(id, callback){
 		dataType : "json",
 		success: function(json){
 			console.log(json);
-			callback && callback(json);		
+			callback && callback(id, json);		
 		},
 		error: function( xhr, status, errorThrown ) {
 			alert( "Sorry, there was a problem!" );
@@ -303,7 +322,8 @@ function getComments(id, callback){
 		dataType : "json",
 		success: function(json){
 			console.log(json);
-			callback && callback(json);		
+			callback && callback(json);
+
 		},
 		error: function( xhr, status, errorThrown ) {
 			alert( "Sorry, there was a problem!" );
@@ -315,7 +335,8 @@ function getComments(id, callback){
 	});
 }
 
-function showCafePhotoes(photoes){
+function showCafePhotoes(id, photoes){
+	var app = appState.getInstance();
 	if(!photoes || !photoes.length){
 		$('#myCarousel').hide();
 	}
@@ -323,16 +344,41 @@ function showCafePhotoes(photoes){
 		var car = $('#myCarousel');
 		var inn = car.find('.carousel-inner');
 		for(var i = 0; i < photoes.length; i++){
-			inn.append($('<div class="item">' +
-							'<img class="img-responsive img-rounded" src="' + photoes[i].url + '" alt="slide #' + i + '" id = "' + photoes[i]._id + '">' +
-						'</div>'));
+			if(inn.find('#'+photoes[i]._id).length == 0)
+				inn.append($('<div class="item">' +
+								'<img class="img-responsive img-rounded" src="' + photoes[i].url + '" alt="slide #' + i + '" id = "' + photoes[i]._id + '">' +
+							'</div>'));
 		}
-		inn.find('.item').eq(0).addClass('active');
+		if(inn.find('.item.active').length == 0)
+			inn.find('.item').eq(0).addClass('active');
 	}
+	/*if(app.getCurrentPage() === app.getMainContainer() && app.getCurrentData() === app.getCafePage())
+		getPhotoes(id, showCafePhotoes);*/
 }
 
-function showCafeComments(comments){
+function addCafeComments(comments){
+	var app = appState.getInstance();
 	var com = $('#comments');
+	comments.sort(function (a,b){
+		return (a.comment.date - b.comment.date);
+	});
+	for(var i = 0; i < comments.length; i++) {
+		var s = $('.comment[comment-id="' + comments[i].comment._id + '"]');
+		if(s.length == 0) {
+			if(com.find('.comment').length > 0)
+				com.find('.comment').eq(0).before(app.getComment());
+			else
+				com.append(app.getComment().clone());
+			var newComment = com.find('.comment').eq(0);
+			newComment.attr('comment-id', comments[i].comment._id);
+			newComment.find('.foto-mark').append($('<div class="row"></div><div class="row"><div class="comment-mark">' + comments[i].mark.mark + '</div></div>'));
+			newComment.find('.foto-mark .row').eq(0).append($.cloudinary.image(comments[i].user.avatar, {width: 300, height: 480, crop: 'fit'}));
+			newComment.find('img').addClass('img-responsive').addClass('img-rounded');
+			newComment.find('.user').html(comments[i].user.firstName + ' ' + comments[i].user.lastName);
+			newComment.find('.date').html(comments[i].comment.date);
+			newComment.find('.text').html(comments[i].comment.text);
+		}
+	}
 }
 
 function showCafeInfo(cafe, rating, subscribed, yourRating){
@@ -358,4 +404,56 @@ function showCafeInfo(cafe, rating, subscribed, yourRating){
 	}
 	$('#cafe-add-places').attr('cafe-id', cafe._id);
 	$('#cafe-remove-places').attr('cafe-id', cafe._id);
+	$('#send-cafe-comment-button').attr('cafe-id', cafe._id);
+}
+
+function sendComment(id){
+	var app = appState.getInstance();
+	var x = $('#input-mark').val();
+	if(x && x >= 0 && x <= 10 && x == Math.round(x)) {
+		var newMark = {
+			userID: app.getUser()._id,
+			mark: parseInt(x)
+		};
+		$.ajax({
+			url: 'http://localhost:8000/api/v1.0/cafe/'+ id + '/mark/overall/',
+			type: "POST",
+			data: newMark,
+			dataType: 'json',
+			success: function(json){
+				console.log(json);
+				if(($('#input-comment').val()) && ($('#input-comment').val() != '')) {
+					var newObj = {
+						userID: app.getUser(),
+						cafeID: id,
+						text: $('#input-comment').val(),
+						date: new Date()
+					};
+					$.ajax({
+						url: 'http://localhost:8000/api/v1.0/cafe/'+id+'/comment/',
+						type: "POST",
+						data: newObj,
+						dataType : "json",
+						success: function(json){
+							console.log(json);
+						},
+						error: function( xhr, status, errorThrown ) {
+							alert( "Sorry, there was a problem!" );
+							console.log( "Error: " + errorThrown );
+							console.log( "Status: " + status );
+							console.log(xhr);
+							//handleRegistrationError(xhr);
+						}
+					});		
+				}
+			},
+			error: function( xhr, status, errorThrown ) {
+				alert( "Sorry, there was a problem!" );
+				console.log( "Error: " + errorThrown );
+				console.log( "Status: " + status );
+				console.log(xhr);
+				//handleRegistrationError(xhr);
+			}
+		});
+	}
 }

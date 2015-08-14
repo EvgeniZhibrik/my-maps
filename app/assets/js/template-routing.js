@@ -12,28 +12,16 @@ $(document).ready(function () {
 		}
 	});
 
-	app.getLoginForm().find('#input-email').on('keyup', function(e){
-		if(validateEmail($(this).val()))
-			$(this).parents('.has-feedback').removeClass('has-error').addClass('has-success');
-		else if(!($(this).val()) || $(this).val() === "")
-			$(this).parents('.has-feedback').removeClass('has-error').removeClass('has-success');
-		else
-			$(this).parents('.has-feedback').addClass('has-error').removeClass('has-success');
-		if($('.has-success').length == 2)
-			$('#sign-in').removeAttr('disabled');
-		else
-			$('#sign-in').attr('disabled', 'disabled');
+	app.getCafePage().find('#send-cafe-comment-button').click(function(e){
+		sendComment($(this).attr('cafe-id'));
 	});
 
-	app.getLoginForm().find('#input-password').on('keyup', function(e){
-		if(!($(this).val()) || $(this).val() === "")
-			$(this).parents('.has-feedback').removeClass('has-success');
-		else
-			$(this).parents('.has-feedback').addClass('has-success');
-		if($('.has-success').length == 2)
-			$('#sign-in').removeAttr('disabled');
-		else
-			$('#sign-in').attr('disabled', 'disabled');
+	app.getLoginForm().find('#input-email').on('change keyup click', function(e){
+		validateInputForm(this);
+	});
+
+	app.getLoginForm().find('#input-password').on('change keyup', function(e){
+		validateInputForm(this);
 	});
 	
 	app.getLoginForm().find('#sign-in').click(function(){
@@ -158,6 +146,9 @@ $(document).ready(function () {
 	
 	app.getCurrentPage().insertAfter(app.getNavbar());
 	activateOffcanvas(app.getMainContainer());
+	validateInputForm($('#input-email'));
+	validateInputForm($('#input-password'));
+
 
 	
 });
