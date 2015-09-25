@@ -360,7 +360,7 @@ function addCafeComments(comments){
 	var app = appState.getInstance();
 	var com = $('#comments');
 	comments.sort(function (a,b){
-		return (a.comment.date - b.comment.date);
+		return ((new Date(a.comment.date)) - (new Date(b.comment.date)));
 	});
 	for(var i = 0; i < comments.length; i++) {
 		var s = $('.comment[comment-id="' + comments[i].comment._id + '"]');
@@ -424,7 +424,7 @@ function sendComment(id){
 				console.log(json);
 				if(($('#input-comment').val()) && ($('#input-comment').val() != '')) {
 					var newObj = {
-						userID: app.getUser(),
+						userID: app.getUser()._id,
 						cafeID: id,
 						text: $('#input-comment').val(),
 						date: new Date()
@@ -436,6 +436,7 @@ function sendComment(id){
 						dataType : "json",
 						success: function(json){
 							console.log(json);
+							openCafePage(id)
 						},
 						error: function( xhr, status, errorThrown ) {
 							alert( "Sorry, there was a problem!" );

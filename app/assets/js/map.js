@@ -34,9 +34,11 @@ function initMap(){
 }
 
 function closeMap(){
-    mapCenter = myMap.getCenter();
-    mapZoom = myMap.getZoom();
-    myMap.destroy();
+    if(myMap){
+        mapCenter = myMap.getCenter();
+        mapZoom = myMap.getZoom();
+        myMap.destroy();
+    }
 }
 
 

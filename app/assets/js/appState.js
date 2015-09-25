@@ -64,7 +64,7 @@ var appState = (function () {
 			})(navbar),
 			changeData: function(newData){
 
-				if(currentPage === mainContainer && currentData !== newData){
+				if(currentPage === mainContainer){
 					clearData();
 					currentData.detach();
 					$('#data').append(newData);
