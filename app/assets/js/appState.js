@@ -19,11 +19,11 @@ var appState = (function () {
 		function clearData() {
 			if (currentPage === mainContainer && currentData === cafePage){
 				currentPage.find('.slide').removeClass('slide');
-				currentData.find('.carousel-inner').html('');
-				currentData.find('#cafe-name').html('');
-				currentData.find('#cafe-rating').html('');
-				currentData.find('#cafe-description').html('');
-				currentData.find('#comments').html('');
+				currentPage.find('.carousel-inner').html('');
+				currentPage.find('#cafe-name').html('');
+				currentPage.find('#cafe-rating').html('');
+				currentPage.find('#cafe-description').html('');
+				currentPage.find('#comments').html('');
 			}
 			else if (currentPage === mainContainer && currentData === mapContainer){
 				closeMap();
