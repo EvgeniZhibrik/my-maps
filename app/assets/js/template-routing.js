@@ -20,7 +20,7 @@ $(document).ready(function () {
 		validateInputForm(this);
 	});
 
-	app.getLoginForm().find('#input-password').on('change keyup', function(e){
+	app.getLoginForm().find('#input-password').on('change keyup click', function(e){
 		validateInputForm(this);
 	});
 	
@@ -85,8 +85,9 @@ $(document).ready(function () {
 
 	app.getMainContainer().find('#add-cafe-btn').click(function(e){
 		getUploadTag(function(json){
-			var uplForm = app.getRegisterCafeForm().find('.upload-form');
-			app.changePage(app.getRegisterCafeForm().clone(true));
+			var regForm = app.getRegisterCafeForm().clone(true);
+			var uplForm = regForm.find('.upload-form');
+			app.changePage(regForm);
 			setupUploadInput(json.tag, uplForm, app);
 		});
 	});
@@ -94,7 +95,7 @@ $(document).ready(function () {
 	app.getRegisterCafeForm().find('#reg-cafe-cancel').click(function(e){
 		app.changePage(app.getMainContainer().clone(true));
 		app.changeData(app.getMapContainer().clone(true));
-		
+		setUserData(app.getUser());
 	});
 
 	app.getRegisterCafeForm().find('#register-cafe').click(function(e){
@@ -131,6 +132,7 @@ $(document).ready(function () {
 				classMap.getInstance().reloadMap();
 			app.changePage(app.getMainContainer().clone(true));
 			app.changeData(app.getMapContainer().clone(true));
+			setUserData(app.getUser());
 		});
 		registerCafe(newCafe, function(json){
 				console.log(json);

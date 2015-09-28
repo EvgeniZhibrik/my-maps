@@ -5,6 +5,10 @@ body {
   font-family: "Verdana" , sans-serif;
 }
 
+textarea {
+  resize: none;
+}
+
 hr{
   margin: 10px 0px;
 }
