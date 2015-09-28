@@ -281,7 +281,7 @@ function openCafePage(id){
 		dataType : "json",
 		success: function(json){
 			console.log(json);
-			app.changeData(app.getCafePage());
+			app.changeData(app.getCafePage().clone(true));
 			showCafeInfo(json.cafe, json.rating, json.subscribed, json.yourRating);
 			getPhotoes(json.cafe._id, showCafePhotoes);
 			getComments(json.cafe._id, addCafeComments);		
@@ -359,25 +359,22 @@ function showCafePhotoes(id, photoes){
 function addCafeComments(comments){
 	var app = appState.getInstance();
 	var com = $('#comments');
-	comments.sort(function (a,b){
+	/*comments.sort(function (a,b){
 		return ((new Date(a.comment.date)) - (new Date(b.comment.date)));
-	});
+	});*/
 	for(var i = 0; i < comments.length; i++) {
-		var s = $('.comment[comment-id="' + comments[i].comment._id + '"]');
-		if(s.length == 0) {
-			if(com.find('.comment').length > 0)
-				com.find('.comment').eq(0).before(app.getComment());
-			else
-				com.append(app.getComment().clone());
-			var newComment = com.find('.comment').eq(0);
-			newComment.attr('comment-id', comments[i].comment._id);
-			newComment.find('.foto-mark').append($('<div class="row"></div><div class="row"><div class="comment-mark">' + comments[i].mark.mark + '</div></div>'));
-			newComment.find('.foto-mark .row').eq(0).append($.cloudinary.image(comments[i].user.avatar, {width: 300, height: 480, crop: 'fit'}));
-			newComment.find('img').addClass('img-responsive').addClass('img-rounded');
-			newComment.find('.user').html(comments[i].user.firstName + ' ' + comments[i].user.lastName);
-			newComment.find('.date').html(comments[i].comment.date);
-			newComment.find('.text').html(comments[i].comment.text);
-		}
+		if(com.find('.comment').length > 0)
+			com.find('.comment').eq(0).before(app.getComment().clone(true));
+		else
+			com.append(app.getComment().clone(true));
+		var newComment = com.find('.comment').eq(0);
+		newComment.attr('comment-id', comments[i].comment._id);
+		newComment.find('.foto-mark').append($('<div class="row"></div><div class="row"><div class="comment-mark">' + comments[i].mark.mark + '</div></div>'));
+		newComment.find('.foto-mark .row').eq(0).append($.cloudinary.image(comments[i].user.avatar, {width: 300, height: 480, crop: 'fit'}));
+		newComment.find('img').addClass('img-responsive').addClass('img-rounded');
+		newComment.find('.user').html(comments[i].user.firstName + ' ' + comments[i].user.lastName);
+		newComment.find('.date').html(comments[i].comment.date);
+		newComment.find('.text').html(comments[i].comment.text);
 	}
 }
 

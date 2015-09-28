@@ -14,65 +14,36 @@ var appState = (function () {
 		var user;
 		var avatar;
 		var photoes;
-		var currentPage = loginForm;
-		var currentData = mapContainer;
-		function clearData() {
-			if (currentPage === mainContainer && currentData === cafePage){
-				currentPage.find('.slide').removeClass('slide');
-				currentPage.find('.carousel-inner').html('');
-				currentPage.find('#cafe-name').html('');
-				currentPage.find('#cafe-rating').html('');
-				currentPage.find('#cafe-description').html('');
-				currentPage.find('#comments').html('');
-			}
-			else if (currentPage === mainContainer && currentData === mapContainer){
-				closeMap();
-				initMap();
-			}
-		}
-
-		function clearPage() {
-			clearData();
-			if(currentPage === loginForm){
-				currentPage.find('#input-email').val('').parents('.has-feedback').removeClass('has-error').removeClass('has-success');
-				currentPage.find('#input-password').val('').parents('.has-feedback').removeClass('has-success');
-				currentPage.find('#sign-in').attr('disabled', 'disabled');
-			}
-			else if (currentPage === registrationForm){
-				currentPage.find('.form-control').val('');
-				currentPage.find('.upload-form').html('');
-			}
-			else if (currentPage === mainContainer){
-				currentPage.find('#additional-user-info').html('');
-			}
-			else if (currentPage === registerCafeForm){
-				currentPage.find('.form-control').val('');
-				currentPage.find('.upload-form').html('');
-			}
-		}
-		
+		var currentPage;
+		var currentData;
+				
 		return {
 			changePage: (function (navb){
 				return function (newPage) {
-					if(currentPage != newPage){
-						clearPage();
-						currentPage.detach();
-						newPage.insertAfter(navb);
-						currentPage = newPage;
+					if(currentData){
+						currentData.detach();
+						currentData = null;
 					}
+					if (currentPage)
+						currentPage.detach();
+					newPage.insertAfter(navb);
+					currentPage = newPage;
+					if(classMap.check())
+						classMap.getInstance().reloadMap();
 				};
 			})(navbar),
 			changeData: function(newData){
-
-				if(currentPage === mainContainer){
-					clearData();
-					currentData.detach();
+					if(currentData){
+						currentData.detach();
+						currentData = null;
+					}
+					else
+						$('#map-container').detach();
 					$('#data').append(newData);
 					currentData = newData;
-				}
-				if(newData === cafePage){
-					currentData.find('#myCarousel').addClass('slide');
-				}
+					$('#myCarousel').addClass('slide');
+					if(classMap.check())
+						classMap.getInstance().reloadMap();
 			},
 			getNavbar: function(){
 				return navbar;
@@ -123,7 +94,7 @@ var appState = (function () {
 				photoes = phot;
 			},
 			makePhotoForm: function(public_id){
-				var s = registerSentPhoto.clone();
+				var s = registerSentPhoto.clone(true);
 				s.find('.form-control').addClass(public_id);
 				return s;
 			}

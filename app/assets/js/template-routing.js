@@ -5,9 +5,9 @@ $(document).ready(function () {
 			logout({email: app.getUser().email}, function(json){
 				app.setUser(null);
 				console.log(json);
-				closeMap();
-				initMap();
-				app.changePage(app.getLoginForm());
+				if(classMap.check())
+					classMap.getInstance().reloadMap();
+				app.changePage(app.getLoginForm().clone(true));
 			});
 		}
 	});
@@ -26,8 +26,8 @@ $(document).ready(function () {
 	
 	app.getLoginForm().find('#sign-in').click(function(){
 		login ($('#input-email').val(), $('#input-password').val(), function(json){
-			app.changePage(app.getMainContainer());
-			app.changeData(app.getMapContainer());
+			app.changePage(app.getMainContainer().clone(true));
+			app.changeData(app.getMapContainer().clone(true));
 			app.setUser(json);
 			setUserData(app.getUser());
 		});
@@ -35,8 +35,9 @@ $(document).ready(function () {
 
 	app.getLoginForm().find('#register').click(function(){
 		getUploadTag(function(json){
-			var uplForm = app.getRegistrationForm().find('.upload-form');
-			app.changePage(app.getRegistrationForm());
+			
+			app.changePage(app.getRegistrationForm().clone(true));
+			var uplForm = $('.upload-form');
 			setupUploadAvatarInput(json.tag, uplForm, app);
 		});	
 	});
@@ -69,8 +70,8 @@ $(document).ready(function () {
 			registration(newUser, function(json){
 				console.log(json);
 				login (json.email, json.password, function(json){
-					app.changePage(app.getMainContainer());
-					app.changeData(app.getMapContainer());
+					app.changePage(app.getMainContainer().clone(true));
+					app.changeData(app.getMapContainer().clone(true));
 					app.setUser(json);
 					setUserData(app.getUser());
 				});
@@ -79,20 +80,20 @@ $(document).ready(function () {
 	});
 
 	app.getRegistrationForm().find('#reg-cancel').click(function(e){
-		app.changePage(app.getLoginForm());
+		app.changePage(app.getLoginForm().clone(true));
 	});
 
 	app.getMainContainer().find('#add-cafe-btn').click(function(e){
 		getUploadTag(function(json){
 			var uplForm = app.getRegisterCafeForm().find('.upload-form');
-			app.changePage(app.getRegisterCafeForm());
+			app.changePage(app.getRegisterCafeForm().clone(true));
 			setupUploadInput(json.tag, uplForm, app);
 		});
 	});
 	
 	app.getRegisterCafeForm().find('#reg-cafe-cancel').click(function(e){
-		app.changePage(app.getMainContainer());
-		app.changeData(app.getMapContainer());
+		app.changePage(app.getMainContainer().clone(true));
+		app.changeData(app.getMapContainer().clone(true));
 		
 	});
 
@@ -126,10 +127,10 @@ $(document).ready(function () {
 				});
 			};
 		}, function(){
-			closeMap();
-			initMap();
-			app.changePage(app.getMainContainer());
-			app.changeData(app.getMapContainer());
+			if(classMap.check())
+				classMap.getInstance().reloadMap();
+			app.changePage(app.getMainContainer().clone(true));
+			app.changeData(app.getMapContainer().clone(true));
 		});
 		registerCafe(newCafe, function(json){
 				console.log(json);
@@ -138,13 +139,13 @@ $(document).ready(function () {
 	});
 
 	app.getMainContainer().find('#map-menu-button').click(function(e){
-		app.changeData(app.getMapContainer());
+		app.changeData(app.getMapContainer().clone(true));
 		$('.row-offcanvas').removeClass('active1').removeClass('active2');
 	});
 
 	
 	
-	app.getCurrentPage().insertAfter(app.getNavbar());
+	app.changePage(app.getLoginForm().clone(true));
 	activateOffcanvas(app.getMainContainer());
 	validateInputForm($('#input-email'));
 	validateInputForm($('#input-password'));
