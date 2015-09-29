@@ -11,11 +11,13 @@ var appState = (function () {
 		var mapContainer = mainContainer.find('#map-container');
 		var cafePage = $(links.eq(5).get(0).import.getElementById('cafe-page'));
 		var comment = $(links.eq(6).get(0).import.getElementsByClassName('comment')[0]);
+		var mapFilter = $(links.eq(7).get(0).import.getElementById('map-filter-form'));
 		var user;
 		var avatar;
 		var photoes;
 		var currentPage;
 		var currentData;
+		var currentFilter;
 				
 		return {
 			changePage: (function (navb){
@@ -44,6 +46,15 @@ var appState = (function () {
 					$('#myCarousel').addClass('slide');
 					if(classMap.check())
 						classMap.getInstance().reloadMap();
+			},
+			changeFilter: function(newFilter){
+				if (currentFilter){
+					currentFilter.detach();
+					currentFilter = null;
+				}
+				$('#right-sidebar').append(newFilter);
+				currentFilter = newFilter;
+
 			},
 			getNavbar: function(){
 				return navbar;
@@ -92,6 +103,9 @@ var appState = (function () {
 			},
 			setPhotoes: function(phot){
 				photoes = phot;
+			},
+			getMapFilter: function(){
+				return mapFilter;
 			},
 			makePhotoForm: function(public_id){
 				var s = registerSentPhoto.clone(true);

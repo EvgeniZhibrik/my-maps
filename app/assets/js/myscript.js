@@ -370,7 +370,7 @@ function addCafeComments(comments){
 		var newComment = com.find('.comment').eq(0);
 		newComment.css('background-color', comments[i].color);
 		newComment.attr('comment-id', comments[i].comment._id);
-		newComment.find('.foto-mark').append($('<div class="row"></div><div class="row"><div>My mark: </div><div class="comment-mark">' + comments[i].mark.mark + '</div></div>'));
+		newComment.find('.foto-mark').append($('<div class="row"></div><div class="row"><div>Mark: </div><div class="comment-mark">' + comments[i].mark.mark + '</div></div>'));
 		newComment.find('.foto-mark .row').eq(0).append($.cloudinary.image(comments[i].user.avatar, {width: 300, height: 480, crop: 'fit'}));
 		newComment.find('img').addClass('img-responsive').addClass('img-rounded');
 		newComment.find('.comment-user').html(comments[i].user.firstName + ' ' + comments[i].user.lastName);
@@ -394,10 +394,10 @@ function showCafeInfo(cafe, rating, subscribed, yourRating){
 	else
 		$('#cafe-rating').html('NO');
 	$('#cafe-rating').css('background-color', rating.color);
-	if(yourRating.value >= 0)
+	/*if(yourRating.value >= 0)
 		$('#your-rating').show().html(yourRating.value);
-	else
-		$('#your-rating').hide();
+	else*/
+	$('#your-rating').hide();
 	$('#your-rating').css('background-color', yourRating.color);
 	$('#cafe-description').html(cafe.description);
 	if(subscribed){

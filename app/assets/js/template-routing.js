@@ -28,6 +28,7 @@ $(document).ready(function () {
 		login ($('#input-email').val(), $('#input-password').val(), function(json){
 			app.changePage(app.getMainContainer().clone(true));
 			app.changeData(app.getMapContainer().clone(true));
+			app.changeFilter(app.getMapFilter().clone(true));
 			app.setUser(json);
 			setUserData(app.getUser());
 		});
@@ -72,6 +73,7 @@ $(document).ready(function () {
 				login (json.email, json.password, function(json){
 					app.changePage(app.getMainContainer().clone(true));
 					app.changeData(app.getMapContainer().clone(true));
+					app.changeFilter(app.getMapFilter().clone(true));
 					app.setUser(json);
 					setUserData(app.getUser());
 				});
@@ -95,6 +97,7 @@ $(document).ready(function () {
 	app.getRegisterCafeForm().find('#reg-cafe-cancel').click(function(e){
 		app.changePage(app.getMainContainer().clone(true));
 		app.changeData(app.getMapContainer().clone(true));
+		app.changeFilter(app.getMapFilter().clone(true));
 		setUserData(app.getUser());
 	});
 
@@ -132,6 +135,7 @@ $(document).ready(function () {
 				classMap.getInstance().reloadMap();
 			app.changePage(app.getMainContainer().clone(true));
 			app.changeData(app.getMapContainer().clone(true));
+			app.changeFilter(app.getMapFilter().clone(true));
 			setUserData(app.getUser());
 		});
 		registerCafe(newCafe, function(json){
@@ -142,6 +146,7 @@ $(document).ready(function () {
 
 	app.getMainContainer().find('#map-menu-button').click(function(e){
 		app.changeData(app.getMapContainer().clone(true));
+		app.changeFilter(app.getMapFilter().clone(true));
 		$('.row-offcanvas').removeClass('active1').removeClass('active2');
 	});
 
