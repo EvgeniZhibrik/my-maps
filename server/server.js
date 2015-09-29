@@ -132,6 +132,26 @@ function getRankingColor(rank){
 
 }
 
+function getCommentColor(rank){
+    var S = 0.2, V = 1.0, H = parseInt(120 * (rank/10.0), 10);
+    var C = V*S;
+    var X = C * ( 1 - Math.abs(((H/60)%2) - 1));
+    var m = V - C;
+    var R,G,B;
+    console.log(H + S + V);
+    if(H < 60){
+        R = parseInt((m + C)*255);
+        G = parseInt((m + X)*255);
+        B = parseInt((m + 0)*255);
+    }
+    else {
+        R = parseInt((m + X)*255);
+        G = parseInt((m + C)*255);
+        B = parseInt((m + 0)*255);
+    }
+    return "#" + componentToHex(R) + componentToHex(G) + componentToHex(B);
+}
+
 
 app.all('/*', function(req,res,next){
     res.contentType('application/json');
@@ -393,7 +413,8 @@ router.get('/cafe/:cafe_id/comment/', function (req, res){
                                         var newObj = {
                                             comment: cur,
                                             user: result_user,
-                                            mark: result_mark
+                                            mark: result_mark,
+                                            color: getCommentColor(result_mark.mark)
                                         };
                                         ar.push(newObj);
                                         prev();
@@ -500,7 +521,29 @@ router.get('/:user_id/cafe/:cafe_id/', function (req, res){
     });
 });
 
+router.post('/:user_id/cafe/:cafe_id/subscribe/', function(req, res){
+    console.log('POST subscribe ' + req.params.user_id + ' '+ req.params.cafe_id);
+    var like = new FavoritesModel({
+        userID:  req.params.user_id,
+        cafeID: req.params.cafe_id
+    });
+    like.save(function(err){
+        if(err)
+            res.status(err.status).send(err);
+        else
+            res.json(like);
+    });
+});
 
+router.delete('/:user_id/cafe/:cafe_id/subscribe/', function(req, res){
+    console.log('DELETE subscribe ' + req.params.user_id + ' '+ req.params.cafe_id);
+    FavoritesModel.remove({userID:req.params.user_id, cafeID: req.params.cafe_id}, function(err){
+        if(err)
+            res.status(err.status).send(err);
+        else
+            res.json({text: 'ok'});
+    });
+});
 
 app.use('/api/v1.0', router);
 

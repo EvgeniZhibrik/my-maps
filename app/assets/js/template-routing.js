@@ -145,8 +145,26 @@ $(document).ready(function () {
 		$('.row-offcanvas').removeClass('active1').removeClass('active2');
 	});
 
+	app.getCafePage().find('#cafe-add-places').click(function(e){
+		subscribeCafe($(this).attr('cafe-id'));
+	});
 	
-	
+	app.getCafePage().find('#cafe-remove-places').click(function(e){
+		unsubscribeCafe($(this).attr('cafe-id'));
+	});
+
+	app.getCafePage().find('.btn-comments').click(function(e){
+		if($(this).attr('aria-expanded') === 'false')
+			$(this).text('Hide comments');
+		else
+			$(this).text('Show comments');
+	});
+
+	app.getCafePage().find('.btn-add-comment').click(function(e){
+		$('.btn-comments').text('Show comments');
+	});
+
+
 	app.changePage(app.getLoginForm().clone(true));
 	activateOffcanvas(app.getMainContainer());
 	validateInputForm($('#input-email'));

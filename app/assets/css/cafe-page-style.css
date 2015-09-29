@@ -81,6 +81,48 @@
   background-color: white;
 }
 
+.comment-mark {
+  text-align: center;
+  font-size: 24px;
+}
+
+.foto-mark{
+  text-align: center;
+
+  border-right-style: solid;
+  border-right-width: 1px;
+  border-color: black;
+}
+
+#comments {
+  padding: 0;
+}
+
+.comment {
+  border-style: solid;
+  border-radius: 3px;
+  border-width: 1px;
+  border-color: black;
+}
+
+.comment-user-date {
+
+  border-bottom-style: solid;
+  border-bottom-width: 1px;
+  border-color: black;
+}
+
+.comment-user-date-text{
+
+  border-left-style: solid;
+  border-left-width: 1px;
+  border-color: black;
+}
+
+.comment-date{
+  font-size: 10px;
+  height: 100%;
+}
 @media (max-width: 768px) {
 
   #cafe-page{

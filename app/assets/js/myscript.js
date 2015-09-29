@@ -368,13 +368,22 @@ function addCafeComments(comments){
 		else
 			com.append(app.getComment().clone(true));
 		var newComment = com.find('.comment').eq(0);
+		newComment.css('background-color', comments[i].color);
 		newComment.attr('comment-id', comments[i].comment._id);
-		newComment.find('.foto-mark').append($('<div class="row"></div><div class="row"><div class="comment-mark">' + comments[i].mark.mark + '</div></div>'));
+		newComment.find('.foto-mark').append($('<div class="row"></div><div class="row"><div>My mark: </div><div class="comment-mark">' + comments[i].mark.mark + '</div></div>'));
 		newComment.find('.foto-mark .row').eq(0).append($.cloudinary.image(comments[i].user.avatar, {width: 300, height: 480, crop: 'fit'}));
 		newComment.find('img').addClass('img-responsive').addClass('img-rounded');
-		newComment.find('.user').html(comments[i].user.firstName + ' ' + comments[i].user.lastName);
-		newComment.find('.date').html(comments[i].comment.date);
+		newComment.find('.comment-user').html(comments[i].user.firstName + ' ' + comments[i].user.lastName);
+		var s = new Date(comments[i].comment.date);
+		var date = s.toDateString();
+		var strTime = s.getHours() + ':';
+		if(s.getMinutes()<10)
+			strTime += "0";
+		strTime += s.getMinutes();
+		newComment.find('.comment-date').html(date + ' ' + strTime);
 		newComment.find('.text').html(comments[i].comment.text);
+		if(comments[i].user._id === app.getUser()._id)
+			$('.btn-add-comment').attr('disabled', 'disabled');
 	}
 }
 
@@ -454,4 +463,42 @@ function sendComment(id){
 			}
 		});
 	}
+}
+
+function subscribeCafe(id){
+	var app = appState.getInstance();
+	$.ajax({
+		url: 'http://localhost:8000/api/v1.0/' + app.getUser()._id + '/cafe/' + id + '/subscribe/',
+		type: 'POST',
+		dataType: 'json',
+		success: function (json){
+			openCafePage(id);
+		},
+		error: function( xhr, status, errorThrown ) {
+			alert( "Sorry, there was a problem!" );
+			console.log( "Error: " + errorThrown );
+			console.log( "Status: " + status );
+			console.log(xhr);
+			//handleRegistrationError(xhr);
+		}
+	});
+}
+function unsubscribeCafe(id){
+	var app = appState.getInstance();
+	$.ajax({
+		url: 'http://localhost:8000/api/v1.0/' + app.getUser()._id + '/cafe/' + id + '/subscribe/',
+		type: 'DELETE',
+		dataType: 'json',
+		success: function (json){
+			console.log(json);
+			openCafePage(id);
+		},
+		error: function( xhr, status, errorThrown ) {
+			alert( "Sorry, there was a problem!" );
+			console.log( "Error: " + errorThrown );
+			console.log( "Status: " + status );
+			console.log(xhr);
+			//handleRegistrationError(xhr);
+		}
+	});
 }
