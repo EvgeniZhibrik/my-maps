@@ -330,29 +330,40 @@ router.get('/cafe/', function(req, res){
                         if(err)
                             res.status(err.status).send(err);
                         else{
-                            var ar = [];
-                            result.forEach(function(cur){
-                                ar.push(cloudinary.url(cur.link, {crop: 'fit', width:150, height:100}));
-                            });
-                            var newCafe = {
-                                type: "Feature",
-                                id: cur._id,
-                                geometry: {
-                                    type: "Point",
-                                    coordinates: [cur.coordinates.latitude, cur.coordinates.longitude]
-                                },
-                                properties: {
-                                    cafe: cur,
-                                    comments: [],
-                                    photoes: ar,
-                                    commentsTag:'',
-                                    //clusterCaption: cur.name,
-                                    balloonContentBody: setBalloonContentBody(cur, result),
-                                    balloonContentHeader: setBalloonContentHeader(cur, Math.round((Math.random()*10)*10)/10.0)
+                            MarksModel.find({cafeID: cur._id}, function(err, result_marks){
+                                if(err)
+                                    res.send(err);
+                                else{
+                                    var mark = 0.0;
+                                    for(var i=0; i< result_marks.length;i++){
+                                        mark+=result_marks[i].mark;
+                                    }
+                                    mark /= result_marks.length;
+                                    var ar = [];
+                                    result.forEach(function(cur){
+                                        ar.push(cloudinary.url(cur.link, {crop: 'fit', width:150, height:100}));
+                                    });
+                                    var newCafe = {
+                                        type: "Feature",
+                                        id: cur._id,
+                                        geometry: {
+                                            type: "Point",
+                                            coordinates: [cur.coordinates.latitude, cur.coordinates.longitude]
+                                        },
+                                        properties: {
+                                            cafe: cur,
+                                            comments: [],
+                                            photoes: ar,
+                                            commentsTag:'',
+                                            //clusterCaption: cur.name,
+                                            balloonContentBody: setBalloonContentBody(cur, result),
+                                            balloonContentHeader: setBalloonContentHeader(cur, Math.round((mark)*10)/10.0)
+                                        }
+                                    };
+                                    obj.features.push(newCafe);
+                                    prev();
                                 }
-                            };
-                            obj.features.push(newCafe);
-                            prev();
+                            });
                         }
                     });
                 };
