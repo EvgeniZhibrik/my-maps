@@ -75,8 +75,8 @@ function setBalloonContentBody(doc, photoes){
             '<div class = "col-xs-12 col-sm-4">'+
             '</div>'+
             '<div class = "col-xs-12 col-sm-8">'+
-                '<button class = "btn btn-success" type="button" onclick = "route(\''+doc._id+'\'")">Route</button>'+
-                '<button class = "btn btn-info" type="button" onclick = "openCafePage(\''+ doc._id +'\')" id = "' + doc._id + '">Cafe page</button>'+
+                '<button class = "btn btn-success btn-balloon" type="button" onclick = "route(\''+doc._id+'\'")">Route</button>'+
+                '<button class = "btn btn-info btn-balloon" type="button" onclick = "openCafePage(\''+ doc._id +'\')" id = "' + doc._id + '">Cafe page</button>'+
             '</div>'+
         '</div>'+
     '</div>';
