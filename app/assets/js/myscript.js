@@ -282,6 +282,7 @@ function openCafePage(id){
 		success: function(json){
 			console.log(json);
 			app.changeData(app.getCafePage().clone(true));
+			app.changeFilter(app.getCafeMenu().clone(true));
 			showCafeInfo(json.cafe, json.rating, json.subscribed, json.yourRating);
 			getPhotoes(json.cafe._id, showCafePhotoes);
 			getComments(json.cafe._id, addCafeComments);		

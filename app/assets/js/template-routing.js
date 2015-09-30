@@ -5,8 +5,6 @@ $(document).ready(function () {
 			logout({email: app.getUser().email}, function(json){
 				app.setUser(null);
 				console.log(json);
-				if(classMap.check())
-					classMap.getInstance().reloadMap();
 				app.changePage(app.getLoginForm().clone(true));
 			});
 		}
@@ -26,10 +24,12 @@ $(document).ready(function () {
 	
 	app.getLoginForm().find('#sign-in').click(function(){
 		login ($('#input-email').val(), $('#input-password').val(), function(json){
+
 			app.changePage(app.getMainContainer().clone(true));
 			app.changeData(app.getMapContainer().clone(true));
 			app.changeFilter(app.getMapFilter().clone(true));
 			app.setUser(json);
+			classMap.getInstance().initMap();
 			setUserData(app.getUser());
 		});
 	});
@@ -74,6 +74,7 @@ $(document).ready(function () {
 					app.changePage(app.getMainContainer().clone(true));
 					app.changeData(app.getMapContainer().clone(true));
 					app.changeFilter(app.getMapFilter().clone(true));
+					classMap.getInstance().reloadMap();
 					app.setUser(json);
 					setUserData(app.getUser());
 				});
@@ -98,6 +99,7 @@ $(document).ready(function () {
 		app.changePage(app.getMainContainer().clone(true));
 		app.changeData(app.getMapContainer().clone(true));
 		app.changeFilter(app.getMapFilter().clone(true));
+		classMap.getInstance().reloadMap();
 		setUserData(app.getUser());
 	});
 
@@ -136,6 +138,7 @@ $(document).ready(function () {
 			app.changePage(app.getMainContainer().clone(true));
 			app.changeData(app.getMapContainer().clone(true));
 			app.changeFilter(app.getMapFilter().clone(true));
+			classMap.getInstance().reloadMap();
 			setUserData(app.getUser());
 		});
 		registerCafe(newCafe, function(json){
@@ -147,6 +150,7 @@ $(document).ready(function () {
 	app.getMainContainer().find('#map-menu-button').click(function(e){
 		app.changeData(app.getMapContainer().clone(true));
 		app.changeFilter(app.getMapFilter().clone(true));
+		classMap.getInstance().reloadMap();
 		$('.row-offcanvas').removeClass('active1').removeClass('active2');
 	});
 
@@ -167,6 +171,10 @@ $(document).ready(function () {
 
 	app.getCafePage().find('.btn-add-comment').click(function(e){
 		$('.btn-comments').text('Show comments');
+	});
+
+	app.getMapFilter().find('#subscribed-checkbox').click(function(e){
+		classMap.getInstance().reloadMap();
 	});
 
 

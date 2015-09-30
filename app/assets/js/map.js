@@ -11,36 +11,37 @@ var classMap = (function(){
                     mapZoom = myMap.getZoom();
                     myMap.destroy();
                     myMap = null;
-                    this.initMap();
-                }   
+                }
+                this.initMap();   
             },
             initMap: function (){
-                var myInt = setInterval(function(){
-                    if($('#map-container').length){
-                        myMap = new ymaps.Map("map-container", {
-                            center: mapCenter,
-                            zoom: mapZoom
-                        });
-                        myMap.geoObjects.add(loadingObjectManager);
-                        clearInterval(myInt);
-                    }
-                },1000);    
+                if($('#map-container').length){
+                    myMap = new ymaps.Map("map-container", {
+                        center: mapCenter,
+                        zoom: mapZoom
+                    });
+                    var checkbox = $('#subscribed-checkbox').prop('checked');
+                    var userID = appState.getInstance().getUser()._id;
+                    var loadingObjectManager = new ymaps.LoadingObjectManager('http://localhost:8000/api/v1.0/cafe/?bbox=%b&z=%z&subscribed='+checkbox+'&id='+userID,
+                    {
+                        // Включаем кластеризацию.
+                        clusterize: true,
+                        splitRequests: true,
+                        // Опции кластеров задаются с префиксом cluster.
+                        clusterHasBalloon: true,
+                        clusterDisableClickZoom: true,
+                        clusterOpenBalloonOnClick: true,
+                        clusterBalloonContentLayout: 'cluster#balloonCarousel',
+                        // Опции объектов задаются с префиксом geoObject
+                        geoObjectOpenBalloonOnClick: true,
+                        geoObjectHasBalloon: true
+                        //geoObjectBalloonContentLayout: MyBalloonContentLayoutClass,
+                    });
+                    myMap.geoObjects.add(loadingObjectManager);
+
+                }    
             
-                var loadingObjectManager = new ymaps.LoadingObjectManager('http://localhost:8000/api/v1.0/cafe/?bbox=%b&z=%z',
-                {   
-                    // Включаем кластеризацию.
-                    clusterize: true,
-                    splitRequests: true,
-                    // Опции кластеров задаются с префиксом cluster.
-                    clusterHasBalloon: true,
-                    clusterDisableClickZoom: true,
-                    clusterOpenBalloonOnClick: true,
-                    clusterBalloonContentLayout: 'cluster#balloonCarousel',
-                    // Опции объектов задаются с префиксом geoObject
-                    geoObjectOpenBalloonOnClick: true,
-                    geoObjectHasBalloon: true
-                    //geoObjectBalloonContentLayout: MyBalloonContentLayoutClass,
-                });
+                
             }
         };
     };
@@ -59,5 +60,4 @@ var classMap = (function(){
 
 ymaps.ready(function(){
     var x = classMap.getInstance();
-    x.initMap();
 });

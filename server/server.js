@@ -311,17 +311,14 @@ router.post('/photo/', function(req, res){
 });
 
 router.get('/cafe/', function(req, res){
+    console.log('GET cafe' + req.query.bbox + req.query.z + req.query.subscribed + req.query.id);
     var arr = req.query.bbox.split(',').map(function(cur){
         return parseFloat(cur);
     });
-    CafeModel.find({
-        'coordinates.latitude': {$gt: arr[0], $lt: arr[2]},
-        'coordinates.longitude': {$gt: arr[1], $lt: arr[3]},
-    },function(err, result){
+    var fu = function(err, result){
         if(err)
             res.status(err.status).send(err);
         else{
-            console.log(result);
             var obj = {
                 "type": "FeatureCollection",
                 "features": []
@@ -364,7 +361,32 @@ router.get('/cafe/', function(req, res){
             });
             f();
         }
-    });
+    };
+    if(req.query.subscribed === "false"){
+        console.log('no subscribed filter');
+        CafeModel.find({
+            'coordinates.latitude': {$gt: arr[0], $lt: arr[2]},
+            'coordinates.longitude': {$gt: arr[1], $lt: arr[3]},
+        },fu);
+    }
+    else {
+        console.log('subscribed filter');
+        FavoritesModel.find({userID: req.query.id},function(err,resultik){
+            if(!err){
+                var x = [];
+                for(var i = 0; i<resultik.length; i++)
+                    x.push(resultik[i].cafeID);
+                console.log(x);
+                CafeModel.find({
+                    'coordinates.latitude': {$gt: arr[0], $lt: arr[2]},
+                    'coordinates.longitude': {$gt: arr[1], $lt: arr[3]},
+                    _id: {$in : x}
+                },fu);
+            }
+             else
+                res.send(err);
+        });
+    }
 });
 
 router.get('/cafe/:cafe_id/photo/', function(req, res){
