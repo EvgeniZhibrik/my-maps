@@ -23,6 +23,14 @@ $(document).ready(function () {
 	});
 	
 	app.getLoginForm().find('#sign-in').click(function(){
+		if($('#remember-me-checkbox').prop('checked')){
+			$.cookie('email', $('#input-email').val());
+			$.cookie('password', $('#input-password').val());
+		}
+		else {
+			$.removeCookie('email');
+			$.removeCookie('password');
+		}
 		login ($('#input-email').val(), $('#input-password').val(), function(json){
 
 			app.changePage(app.getMainContainer().clone(true));
@@ -177,11 +185,21 @@ $(document).ready(function () {
 		classMap.getInstance().reloadMap();
 	});
 
-
-	app.changePage(app.getLoginForm().clone(true));
 	activateOffcanvas(app.getMainContainer());
-	validateInputForm($('#input-email'));
-	validateInputForm($('#input-password'));
+	if($.cookie('email') && $.cookie('password'))
+		login($.cookie('email'),$.cookie('password'), function (json){
+			app.changePage(app.getMainContainer().clone(true));
+			app.changeData(app.getMapContainer().clone(true));
+			app.changeFilter(app.getMapFilter().clone(true));
+			app.setUser(json);
+			classMap.getInstance().initMap();
+			setUserData(app.getUser());
+		});
+	else{
+		app.changePage(app.getLoginForm().clone(true));
+		validateInputForm($('#input-email'));
+		validateInputForm($('#input-password'));
+	}
 
 
 	
