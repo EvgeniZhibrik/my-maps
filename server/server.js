@@ -607,5 +607,3 @@ var colb = function(resu){
         console.log(JSON.stringify(newObj));
     }
 };
-
-syncDbSelector(arrr, colb)();
