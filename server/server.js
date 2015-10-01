@@ -58,10 +58,7 @@ var RankingModel = mongoose.model( 'Ranking', schemas.rankingSchema);
 
 function setBalloonContentBody(doc, photoes){
     var i = parseInt(Math.random()*photoes.length);
-    console.log(i);
-    console.log(photoes[i].link);
     var im = cloudinary.url(photoes[i].link, {});
-    console.log(im);
     var s = '<div class = "container-fluid">'+
         '<div class = "row">'+
             '<div class = "col-xs-12 col-sm-4 balloon-photo">'+
@@ -80,7 +77,6 @@ function setBalloonContentBody(doc, photoes){
             '</div>'+
         '</div>'+
     '</div>';
-    console.log(s);
     return s;
 }
 
@@ -92,13 +88,12 @@ function setBalloonContentHeader(doc, rank){
                 '<hr>'+
             '</div>'+
             '<div class="col-xs-3 col-sm-3 col-md-2">'+
-                '<div class="balloon-rating" style="background-color:'+ getRankingColor(rank)+';">'+
+                '<div class="balloon-rating" style="background-color:'+ getRankingColor(rank, 'page')+';">'+
                     rank+
                 '</div>'+
             '</div>'+
         '</div>'+
     '</div>';
-    console.log(s);
     return s;
 }
 
@@ -107,11 +102,18 @@ function componentToHex(c) {
     return hex.length == 1 ? "0" + hex : hex;
 }
 
-function getRankingColor(rank){
-    var H = 0, S = 0, V = 0.5;
-    if(rank >= 0){
-        S = 1;
-        V = 0.7;
+function getRankingColor(rank, type){
+    var H = 0, S = 0, V = 0.5;;
+    if(type === 'page'){
+        if(rank >= 0){
+            S = 1;
+            V = 0.7;
+            H = parseInt(120 * (rank/10.0), 10);
+        }
+    }
+    else if (type === 'comment'){
+        S = 0.2;
+        V = 1.0;
         H = parseInt(120 * (rank/10.0), 10);
     }
     var C = V*S;
@@ -132,25 +134,6 @@ function getRankingColor(rank){
 
 }
 
-function getCommentColor(rank){
-    var S = 0.2, V = 1.0, H = parseInt(120 * (rank/10.0), 10);
-    var C = V*S;
-    var X = C * ( 1 - Math.abs(((H/60)%2) - 1));
-    var m = V - C;
-    var R,G,B;
-    console.log(H + S + V);
-    if(H < 60){
-        R = parseInt((m + C)*255);
-        G = parseInt((m + X)*255);
-        B = parseInt((m + 0)*255);
-    }
-    else {
-        R = parseInt((m + X)*255);
-        G = parseInt((m + C)*255);
-        B = parseInt((m + 0)*255);
-    }
-    return "#" + componentToHex(R) + componentToHex(G) + componentToHex(B);
-}
 
 
 app.all('/*', function(req,res,next){
@@ -169,7 +152,6 @@ router.get('/upload_tag/', function(req, res){
     var s = cloudinary.uploader.image_upload_tag('image_id',{ 
         disableImageResize: false, 
     });
-    console.log("response: "+s);
     res.json({tag: s});
 });
 
@@ -177,13 +159,11 @@ router.delete('/image/:public_id/:stored/', function(req, res){
     console.log("DELETE " + req.params.public_id + ' ' + req.params.stored);
     if(req.params.stored === 'false'){
         cloudinary.uploader.destroy(req.params.public_id, function(result){
-            console.log(result);
             res.json(result);
         });
     }
-    else{
+    else
         res.status(400).send(':(');
-    }
 });
 
 router.post('/user/register/',function(req, res){
@@ -196,19 +176,16 @@ router.post('/user/register/',function(req, res){
         password: newUser.password
     };
     appStormpath.createAccount(account, function(err, acc){
-        if(err){
-            console.log(err);
+        if(err)
             res.status(err.status).send(err);
-        }
         else{
             newUser.active = false;
             var user = new UserModel(newUser);
             user.save(function(err){
                 if(!err){
                     acc.getCustomData(function(err, customData){
-                        if(err) {
+                        if(err)
                             res.status(err.status).send(err);
-                        }
                         else {
                             customData.id = user._id;
                             customData.save(function(err){
@@ -220,11 +197,8 @@ router.post('/user/register/',function(req, res){
                         }
                     });  
                 }
-                else {
-                    console.log(err);
+                else
                     res.status(err.status).send(err);
-                }
-
             });
         }
     });
@@ -233,10 +207,8 @@ router.post('/user/register/',function(req, res){
 router.post('/user/login/', function(req, res){
     console.log("POST login: "+req.body);
     appStormpath.authenticateAccount(req.body, function(err, result){
-        if(err){
-            console.log(err);
+        if(err)
             res.status(err.status).send(err);
-        }
         else {
             result.getAccount(function(err, account){
                 if(err) res.status(err.status).send(err);
@@ -251,12 +223,8 @@ router.post('/user/login/', function(req, res){
                                     user.active = true;
                                     user.save(function(err, updUser){
                                         if(err) res.status(err.status).send(err);
-                                        else {
-                                            console.log(updUser);
-                                            res.json(updUser);
-                                        }
+                                        else res.json(updUser);
                                     });
-                                    
                                 }
                             });
                         }
@@ -447,7 +415,7 @@ router.get('/cafe/:cafe_id/comment/', function (req, res){
                                             comment: cur,
                                             user: result_user,
                                             mark: result_mark,
-                                            color: getCommentColor(result_mark.mark)
+                                            color: getRankingColor(result_mark.mark, 'comment')
                                         };
                                         ar.push(newObj);
                                         prev();
@@ -537,8 +505,8 @@ router.get('/:user_id/cafe/:cafe_id/', function (req, res){
                                             var mark = (result_mark) ? result_mark.mark : -1;
                                             var newObj = {
                                                 cafe: result_cafe,
-                                                rating: { value: r, color: getRankingColor(r) },
-                                                yourRating: { value: mark, color: getRankingColor(mark) },
+                                                rating: { value: r, color: getRankingColor(r, 'page') },
+                                                yourRating: { value: mark, color: getRankingColor(mark , 'page') },
                                                 subscribed: !!result_favor,
                                             };
                                             res.json(newObj);
@@ -592,3 +560,52 @@ stormpath.loadApiKey(keyfile, function apiKeyFileLoaded(err, apiKey) {
         app.listen(port);
     });
 });
+
+var arrr = [{
+    selector: function(){return CafeModel.findOne;} + '',
+    conditions: JSON.stringify({_id: '560bf7cc2064e7741a8f6ad4'}),
+    twoArgs: true
+},{
+    selector: function(){return FavoritesModel.findOne;}+'',
+    conditions: JSON.stringify({userID: '560a9e1f76993150195f3280' , cafeID: '560bf7cc2064e7741a8f6ad4'}),
+    twoArgs: true
+}, {
+    selector: function(){return RankingModel.findOne;}+'',
+    conditions: JSON.stringify({category : 'overall'}),
+    twoArgs: true
+}, {
+    selector: function(){return MarksModel.findOne;}+'',
+    conditions: JSON.stringify({userID: '560a9e1f76993150195f3280', cafeID: '560bf7cc2064e7741a8f6ad4', category: function(){ return results_arr[2]._id;}+''}),
+    twoArgs: true
+}, {
+    selector:  function(){return MarksModel.find;}+'',
+    conditions: JSON.stringify({cafeID: '560bf7cc2064e7741a8f6ad4', category: function(){ return results_arr[2]._id; }+''}),
+    twoArgs: true
+}];
+
+var colb = function(resu){
+    if(isError(resu))
+        console.log(resu);
+    else{
+        var r;
+        if(resu[4]){
+            r = 0;
+            for(var i = 0; i < resu[4].length; i++){
+                r+=resu[4][i].mark;
+            }
+            r/=resu[4].length;
+            r = Math.round(r*10)/10.0;
+        }
+        r = (r) ? r : -1;
+        var mark = (resu[3]) ? resu[3].mark : -1;
+        var newObj = {
+            cafe: resu[0],
+            rating: { value: r, color: getRankingColor(r, 'page') },
+            yourRating: { value: mark, color: getRankingColor(mark , 'page') },
+            subscribed: !!resu[1]
+        };
+        console.log(JSON.stringify(newObj));
+    }
+};
+
+syncDbSelector(arrr, colb)();
