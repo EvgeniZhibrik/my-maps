@@ -472,7 +472,36 @@ router.post('/cafe/:cafe_id/mark/:category/', function(req, res){
 
 router.get('/:user_id/cafe/:cafe_id/', function (req, res){
     console.log('GET cafe ' + req.params.cafe_id);
-    CafeModel.findOne({_id: req.params.cafe_id}, function(err, result_cafe){
+    var c_arr = [CafeModel, FavoritesModel, RankingModel, MarksModel, MarksModel];
+    var f_arr = [1,1,1,1,2];
+    var s_arr = [{_id: '560bf7cc2064e7741a8f6ad4'},
+    {userID: '560a8b4da8e159ac1e9325b3' , cafeID: '560bf7cc2064e7741a8f6ad4'},
+    {category : 'overall'},
+    {userID: '560a8b4da8e159ac1e9325b3' , cafeID: '560bf7cc2064e7741a8f6ad4'},
+    {cafeID: '560bf7cc2064e7741a8f6ad4'}];
+    asc_arr = [null,null,null,function(a,b){a['category']=b[2]._id;}, function(a,b){a['category']=b[2]._id;}];
+    syncDBselect(c_arr,f_arr,s_arr,asc_arr,function(res_arr){
+        var r;
+        if(res_arr[4]){
+            r = 0;
+            for(var i = 0; i < res_arr[4].length; i++){
+                r+=res_arr[4][i].mark;
+            }
+            r/=res_arr[4].length;
+            r = Math.round(r*10)/10.0;
+        }
+        r = (r) ? r : -1;
+        var mark = (res_arr[3]) ? res_arr[3].mark : -1;
+        var newObj = {
+            cafe: res_arr[0],
+            rating: { value: r, color: getRankingColor(r, 'page') },
+            yourRating: { value: mark, color: getRankingColor(mark , 'page') },
+            subscribed: !!res_arr[1]
+        };
+        res.json(newObj);
+    },function(err){res.send(err);});
+
+    /*CafeModel.findOne({_id: req.params.cafe_id}, function(err, result_cafe){
         if (err)
             res.status(err.status).send(err);
         else {
@@ -519,7 +548,7 @@ router.get('/:user_id/cafe/:cafe_id/', function (req, res){
                 }
             });
         }
-    });
+    });*/
 });
 
 router.post('/:user_id/cafe/:cafe_id/subscribe/', function(req, res){
@@ -561,49 +590,68 @@ stormpath.loadApiKey(keyfile, function apiKeyFileLoaded(err, apiKey) {
     });
 });
 
-var arrr = [{
-    selector: function(){return CafeModel.findOne;} + '',
-    conditions: JSON.stringify({_id: '560bf7cc2064e7741a8f6ad4'}),
-    twoArgs: true
-},{
-    selector: function(){return FavoritesModel.findOne;}+'',
-    conditions: JSON.stringify({userID: '560a9e1f76993150195f3280' , cafeID: '560bf7cc2064e7741a8f6ad4'}),
-    twoArgs: true
-}, {
-    selector: function(){return RankingModel.findOne;}+'',
-    conditions: JSON.stringify({category : 'overall'}),
-    twoArgs: true
-}, {
-    selector: function(){return MarksModel.findOne;}+'',
-    conditions: JSON.stringify({userID: '560a9e1f76993150195f3280', cafeID: '560bf7cc2064e7741a8f6ad4', category: function(){ return results_arr[2]._id;}+''}),
-    twoArgs: true
-}, {
-    selector:  function(){return MarksModel.find;}+'',
-    conditions: JSON.stringify({cafeID: '560bf7cc2064e7741a8f6ad4', category: function(){ return results_arr[2]._id; }+''}),
-    twoArgs: true
-}];
+/*var c_arr = [CafeModel, FavoritesModel, RankingModel, MarksModel, MarksModel];
+var f_arr = [1,1,1,1,2];
 
-var colb = function(resu){
-    if(isError(resu))
-        console.log(resu);
-    else{
-        var r;
-        if(resu[4]){
-            r = 0;
-            for(var i = 0; i < resu[4].length; i++){
-                r+=resu[4][i].mark;
-            }
-            r/=resu[4].length;
-            r = Math.round(r*10)/10.0;
+var s_arr = [{_id: '560bf7cc2064e7741a8f6ad4'},
+    {userID: '560a8b4da8e159ac1e9325b3' , cafeID: '560bf7cc2064e7741a8f6ad4'},
+    {category : 'overall'},
+    {userID: '560a8b4da8e159ac1e9325b3' , cafeID: '560bf7cc2064e7741a8f6ad4'},
+    {cafeID: '560bf7cc2064e7741a8f6ad4'}];
+asc_arr = [null,null,null,function(a,b){a['category']=b[2]._id;}, function(a,b){a['category']=b[2]._id;}];*/
+function syncDBselect (coll_arr, func_arr, select_arr, addSelCallback_arr, callback, ifError){
+    var result_arr = [];
+    var f = coll_arr.reduceRight(function(prev, cur, ind, arr){
+        return (function (i) {
+            return function(err, result){
+                if (err){
+                    ifError(err);
+                }
+                else{
+                    if(i-1>=0)
+                    result_arr[i-1] = result;
+                }
+                if(addSelCallback_arr[i]){
+                    addSelCallback_arr[i](select_arr[i], result_arr);
+                }
+                if(func_arr[i]==1){
+                    cur.findOne(select_arr[i], prev);
+                }
+                else if(func_arr[i]==2){
+                    cur.find(select_arr[i],prev);
+                }
+            };
+        })(ind);
+    },function(err,result){
+        if(err)
+            ifError(err);
+        else{
+            result_arr[coll_arr.length-1]=result;
+            callback(result_arr);
         }
-        r = (r) ? r : -1;
-        var mark = (resu[3]) ? resu[3].mark : -1;
-        var newObj = {
-            cafe: resu[0],
-            rating: { value: r, color: getRankingColor(r, 'page') },
-            yourRating: { value: mark, color: getRankingColor(mark , 'page') },
-            subscribed: !!resu[1]
-        };
-        console.log(JSON.stringify(newObj));
+            
+    });
+
+    f();
+}
+
+/*syncDBselect(c_arr,f_arr,s_arr,asc_arr,function(res_arr){
+    var r;
+    if(res_arr[4]){
+        r = 0;
+        for(var i = 0; i < res_arr[4].length; i++){
+            r+=res_arr[4][i].mark;
+        }
+        r/=res_arr[4].length;
+        r = Math.round(r*10)/10.0;
     }
-};
+    r = (r) ? r : -1;
+    var mark = (res_arr[3]) ? res_arr[3].mark : -1;
+    var newObj = {
+        cafe: res_arr[0],
+        rating: { value: r, color: getRankingColor(r, 'page') },
+        yourRating: { value: mark, color: getRankingColor(mark , 'page') },
+        subscribed: !!res_arr[1]
+    };
+    console.log(JSON.stringify(newObj));
+},function(err){console.log('not ok');})*/
