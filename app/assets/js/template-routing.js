@@ -82,8 +82,9 @@ $(document).ready(function () {
 					app.changePage(app.getMainContainer().clone(true));
 					app.changeData(app.getMapContainer().clone(true));
 					app.changeFilter(app.getMapFilter().clone(true));
-					classMap.getInstance().reloadMap();
 					app.setUser(json);
+					classMap.getInstance().reloadMap();
+					
 					setUserData(app.getUser());
 				});
 			});

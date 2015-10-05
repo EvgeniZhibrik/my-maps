@@ -175,80 +175,42 @@ router.post('/user/register/',function(req, res){
         email: newUser.email,
         password: newUser.password
     };
-    appStormpath.createAccount(account, function(err, acc){
-        if(err)
-            res.status(err.status).send(err);
-        else{
-            newUser.active = false;
-            var user = new UserModel(newUser);
-            user.save(function(err){
-                if(!err){
-                    acc.getCustomData(function(err, customData){
-                        if(err)
-                            res.status(err.status).send(err);
-                        else {
-                            customData.id = user._id;
-                            customData.save(function(err){
-                                if(err) 
-                                    res.status(err.status).send(err);
-                                else 
-                                    res.json(newUser);
-                            });
-                        }
-                    });  
-                }
-                else
-                    res.status(err.status).send(err);
-            });
-        }
+    var c_arr = [appStormpath,0,-2,-1];
+    var f_arr = [3, 4, 5, 4];
+    var s_arr = [account, null, null, null];
+    var asc_arr = [null, {t:0 , v: 'default', fun: function(){ newUser.active = false; return new UserModel(newUser); } }, null, { t: -1, s: -2, fun: function(a,c){ a['id'] = c['_id'];} }];
+    syncDBselect(c_arr,f_arr,s_arr,asc_arr, function(res_arr){
+        newUser._id = res_arr[1]._id
+        res.json(newUser);
+    }, function(err){ 
+        res.send(err);
     });
 });
 
 router.post('/user/login/', function(req, res){
     console.log("POST login: "+req.body);
-    appStormpath.authenticateAccount(req.body, function(err, result){
-        if(err)
-            res.status(err.status).send(err);
-        else {
-            result.getAccount(function(err, account){
-                if(err) res.status(err.status).send(err);
-                else {
-                    account.getCustomData(function(err, customData){
-                        if(err) res.status(err.status).send(err);
-                        else {
-                            UserModel.findById(customData.id, function(err, user){
-                                if(err) res.status(err.status).send(err);
-                                else {
-                                    user.lastLogin = Date.now();
-                                    user.active = true;
-                                    user.save(function(err, updUser){
-                                        if(err) res.status(err.status).send(err);
-                                        else res.json(updUser);
-                                    });
-                                }
-                            });
-                        }
-                    });
-                }
-            });
-        }
+    var c_arr = [appStormpath, -1, -1, UserModel, -1];
+    var f_arr = [6,7,5,1,4];
+    var s_arr = [req.body, null, null, {}, null];
+    var asc_arr = [null, null, null, function(a,b){ a['_id'] = b[2].id; }, {t:-1, s:0, fun: function(a){ a['lastLogin'] = Date.now(); a['active'] = true;}}];
+    syncDBselect(c_arr, f_arr, s_arr, asc_arr, function(res_arr){
+        res.json(res_arr[4]);
+    }, function(err){
+        res.send(err);
     });
 });
 
 router.post('/user/logout/', function (req, res){
     console.log("POST logout: "+req.body);
     console.log(req.body.email);
-    UserModel.findOne ( {email : req.body.email} , function(err , user){
-        if(err) res.status(err.status).send(err);
-        else{
-            user.active = false;
-            user.save(function(err, updUser){
-                if(err) res.status(err.status).send(err);
-                else{
-                    res.status(200).json({text: 'haha'});
-                }
-            });
-        }
+    var c_arr = [UserModel, -1];
+    var f_arr = [1, 4];
+    var s_arr = [{email : req.body.email}, null];
+    var asc_arr = [null, {t:-1, s:0, fun: function(a){ a['active'] = false;}}];
+    syncDBselect(c_arr,f_arr,s_arr,asc_arr,function(res_arr){
+        res.json({});
+    }, function(err){
+        res.send(err);
     });
 });
 
@@ -283,16 +245,78 @@ router.get('/cafe/', function(req, res){
     var arr = req.query.bbox.split(',').map(function(cur){
         return parseFloat(cur);
     });
-    var fu = function(err, result){
-        if(err)
-            res.status(err.status).send(err);
-        else{
-            var obj = {
-                "type": "FeatureCollection",
-                "features": []
-            };
-            var f = result.reduceRight(function(prev, cur, ind, arr){
-                //var photoes = FotoModel.find({});
+    var c_arr = [], f_arr = [], s_arr = [], asc_arr = [];
+    if(req.query.subscribed == 'true'){
+        c_arr.push(FavoritesModel, CafeModel);
+        f_arr.push(2, 2);
+        s_arr.push({userID: req.query.id}, { 'coordinates.latitude': {$gt: arr[0], $lt: arr[2]}, 'coordinates.longitude': {$gt: arr[1], $lt: arr[3]}});
+        asc_arr.push(null, function(a,b){ 
+            var x = []; 
+            for(var i = 0; i < b[0].length; i++){
+                x.push(b[0][i].cafeID);  
+            }
+            a['_id'] = { $in: x};
+        });
+    }
+    else{
+        c_arr.push(CafeModel);
+        f_arr.push(2);
+        s_arr.push({ 'coordinates.latitude': {$gt: arr[0], $lt: arr[2]}, 'coordinates.longitude': {$gt: arr[1], $lt: arr[3]}});
+        asc_arr.push(null);
+    }
+    syncDBselect(c_arr, f_arr, s_arr, asc_arr, function(res_arr){
+        var obj = {
+            "type": "FeatureCollection",
+            "features": []
+        };
+        var c1_arr = [];
+        var f1_arr = [];
+        var s1_arr = [];
+        var asc1_arr = [];
+        for (var i=0; i<res_arr[res_arr.length-1].length;i++){
+            var s = res_arr[res_arr.length-1][i];
+            c1_arr.push(FotoModel, MarksModel);
+            f1_arr.push(2,2);
+            s1_arr.push({cafeID: s._id},{cafeID: s._id});
+            asc1_arr.push({t:0, s: -1, fun: function(a,b){
+                var ar = [];
+                b.forEach(function(cur){
+                    ar.push(cloudinary.url(cur.link, {crop: 'fit', width:150, height:100}));
+                });
+                obj.features.push({
+                    type: "Feature",
+                    id: s._id,
+                    geometry: {
+                        type: "Point",
+                        coordinates: [s.coordinates.latitude, s.coordinates.longitude]
+                    },
+                    properties: {
+                        cafe: s,
+                        comments: [],
+                        photoes: ar,
+                        commentsTag:'',
+                        balloonContentBody: setBalloonContentBody(s, b)
+                    }
+                });
+            }}, {t: 0, s: -1, fun: function(a,b){
+                var mark = 0.0;
+                for(var i =0; i < b.length; i++){
+                    mark += b[i].mark;
+                }
+                mark /= b.length;
+                obj.features[obj.features.length-1].properties.balloonContentHeader = setBalloonContentHeader(s,Math.round((mark)*10)/10.0);
+            }});
+        }
+        syncDBselect(c1_arr, f1_arr, s1_arr, asc1_arr, function(res_arr){
+            res.json(obj);
+        }, function(err){
+            res.send(err);
+        });
+    }, function(err){
+        res.send(err);
+    });
+                
+    /*var f = result.reduceRight(function(prev, cur, ind, arr){
                 return function (){
                     FotoModel.find({cafeID: cur._id},function(err, result){
                         if(err)
@@ -365,7 +389,7 @@ router.get('/cafe/', function(req, res){
              else
                 res.send(err);
         });
-    }
+    }*/
 });
 
 router.get('/cafe/:cafe_id/photo/', function(req, res){
@@ -500,55 +524,6 @@ router.get('/:user_id/cafe/:cafe_id/', function (req, res){
         };
         res.json(newObj);
     },function(err){res.send(err);});
-
-    /*CafeModel.findOne({_id: req.params.cafe_id}, function(err, result_cafe){
-        if (err)
-            res.status(err.status).send(err);
-        else {
-            FavoritesModel.findOne({userID: req.params.user_id , cafeID: req.params.cafe_id}, function(err, result_favor){
-                if(err)
-                    res.status(err.status).send(err);
-                else {
-                    RankingModel.findOne({category : 'overall'}, function(err, result_category){
-                        if(err)
-                            res.status(err.status).send(err);
-                        else {
-                            MarksModel.findOne({userID: req.params.user_id, cafeID: req.params.cafe_id, category: result_category._id}, function(err, result_mark){
-                                if(err)
-                                    res.status(err.status).send(err);
-                                else {
-                                    MarksModel.find({cafeID: req.params.cafe_id, category: result_category._id}, function(err, result_marks){
-                                        if(err)
-                                            res.status(err.status).send(err);
-                                        else {
-                                            var r;
-                                            if(result_marks){
-                                                r = 0;
-                                                for(var i = 0; i < result_marks.length; i++){
-                                                    r+=result_marks[i].mark;
-                                                }
-                                                r/=result_marks.length;
-                                                r = Math.round(r*10)/10.0;
-                                            }
-                                            r = (r) ? r : -1;
-                                            var mark = (result_mark) ? result_mark.mark : -1;
-                                            var newObj = {
-                                                cafe: result_cafe,
-                                                rating: { value: r, color: getRankingColor(r, 'page') },
-                                                yourRating: { value: mark, color: getRankingColor(mark , 'page') },
-                                                subscribed: !!result_favor,
-                                            };
-                                            res.json(newObj);
-                                        } 
-                                    });
-                                }    
-                            });
-                        }
-                    });
-                }
-            });
-        }
-    });*/
 });
 
 router.post('/:user_id/cafe/:cafe_id/subscribe/', function(req, res){
@@ -587,20 +562,116 @@ stormpath.loadApiKey(keyfile, function apiKeyFileLoaded(err, apiKey) {
         appStormpath = application;
         console.log('Stormpath Application retrieved! ' + appStormpath) ;
         app.listen(port);
+        var c_arr = [], f_arr = [], s_arr = [], asc_arr = [];
+        if(1 == 'true'){
+            c_arr.push(FavoritesModel, CafeModel);
+            f_arr.push(2, 2);
+            s_arr.push({userID: '560a86ca5264e3640503ba66'}, { 'coordinates.latitude':{$gt:53.823958, $lt:53.989382} , 'coordinates.longitude': {$gt: 27.318123, $lt: 27.782296} });
+            asc_arr.push(null, function(a,b){ 
+                var x = []; 
+                for(var i = 0; i < b[0].length; i++){
+                    x.push(b[0][i].cafeID);  
+                }
+                a['_id'] = { $in: x};
+            });
+        }
+        else{
+            c_arr.push(CafeModel);
+            f_arr.push(2);
+            s_arr.push({ 'coordinates.latitude':{$gt:53.823958, $lt:53.989382} , 'coordinates.longitude': {$gt: 27.318123, $lt: 27.782296} });
+            asc_arr.push(null);
+        }
+        syncDBselect(c_arr, f_arr, s_arr, asc_arr, function(res_arr){
+            var obj = {
+                "type": "FeatureCollection",
+                "features": []
+            };
+            var c1_arr = [];
+            var f1_arr = [];
+            var s1_arr = [];
+            var asc1_arr = [];
+            for (var i=0; i<res_arr[res_arr.length-1].length;i++){
+                var s = res_arr[res_arr.length-1][i];
+                c1_arr.push(FotoModel, MarksModel);
+                f1_arr.push(2,2);
+                s1_arr.push({cafeID: s._id},{cafeID: s._id});
+                if(i>0){
+                    asc1_arr.push({t: -1, s: -2, fun: function(a,b){
+                        var ar = [];
+                        b.forEach(function(cur){
+                            ar.push(cloudinary.url(cur.link, {crop: 'fit', width:150, height:100}));
+                        });
+                        var mark = 0.0;
+                        for(var i =0; i < a.length; i++){
+                            mark += a[i].mark;
+                        }
+                        mark /= a.length;
+                        obj.features.push({
+                            type: "Feature",
+                            id: s._id,
+                            geometry: {
+                                type: "Point",
+                                coordinates: [s.coordinates.latitude, s.coordinates.longitude]
+                            },
+                            properties: {
+                                cafe: s,
+                                comments: [],
+                                photoes: ar,
+                                commentsTag:'',
+                                balloonContentBody: setBalloonContentBody(s, b),
+                                balloonContentHeader: setBalloonContentHeader(s, Math.round((mark)*10)/10.0)
+                            }
+                        });
+                    }}, null);
+                }
+                else{
+                    asc1_arr.push(null,null);
+                }
+            }
+            syncDBselect(c1_arr, f1_arr, s1_arr, asc1_arr, function(res_arr1){
+
+                var s;
+                if(res_arr.length % 2 ==0)
+                    s = res_arr[1][res_arr[1].length-1];
+                else
+                    s = res_arr[0][res_arr[0].length-1];
+                var ar = [];
+                res_arr1[res_arr1.length-2].forEach(function(cur){
+                    ar.push(cloudinary.url(cur.link, {crop: 'fit', width:150, height:100}));
+                });
+                var mark = 0.0;
+                for(var i =0; i < res_arr1[res_arr1.length-1].length; i++){
+                    mark += res_arr1[res_arr1.length-1][i].mark;
+                }
+                mark /= res_arr1[res_arr1.length-1].length;
+                obj.features.push({
+                    type: "Feature",
+                    id: s._id,
+                    geometry: {
+                        type: "Point",
+                        coordinates: [s.coordinates.latitude, s.coordinates.longitude]
+                    },
+                    properties: {
+                        cafe: s,
+                        comments: [],
+                        photoes: ar,
+                        commentsTag:'',
+                        balloonContentBody: setBalloonContentBody(s, res_arr1[res_arr1.length-2]),
+                        balloonContentHeader: setBalloonContentHeader(s, Math.round((mark)*10)/10.0)
+                    }
+                });
+                console.log(JSON.stringify(obj));
+            }, function(err){
+                console.log(err);
+            });
+        }, function(err){
+            console.log(err);
+        });
     });
 });
 
-/*var c_arr = [CafeModel, FavoritesModel, RankingModel, MarksModel, MarksModel];
-var f_arr = [1,1,1,1,2];
-
-var s_arr = [{_id: '560bf7cc2064e7741a8f6ad4'},
-    {userID: '560a8b4da8e159ac1e9325b3' , cafeID: '560bf7cc2064e7741a8f6ad4'},
-    {category : 'overall'},
-    {userID: '560a8b4da8e159ac1e9325b3' , cafeID: '560bf7cc2064e7741a8f6ad4'},
-    {cafeID: '560bf7cc2064e7741a8f6ad4'}];
-asc_arr = [null,null,null,function(a,b){a['category']=b[2]._id;}, function(a,b){a['category']=b[2]._id;}];*/
 function syncDBselect (coll_arr, func_arr, select_arr, addSelCallback_arr, callback, ifError){
-    var result_arr = [];
+    var result_arr = new Array(coll_arr.length);
     var f = coll_arr.reduceRight(function(prev, cur, ind, arr){
         return (function (i) {
             return function(err, result){
@@ -610,15 +681,49 @@ function syncDBselect (coll_arr, func_arr, select_arr, addSelCallback_arr, callb
                 else{
                     if(i-1>=0)
                     result_arr[i-1] = result;
-                }
-                if(addSelCallback_arr[i]){
-                    addSelCallback_arr[i](select_arr[i], result_arr);
-                }
-                if(func_arr[i]==1){
-                    cur.findOne(select_arr[i], prev);
-                }
-                else if(func_arr[i]==2){
-                    cur.find(select_arr[i],prev);
+                    
+                    if(typeof addSelCallback_arr[i] == 'function'){
+                        addSelCallback_arr[i](select_arr[i], result_arr);
+                    }
+                    else if(addSelCallback_arr[i] && typeof addSelCallback_arr[i] == 'object'){
+                        if(!result_arr[i+addSelCallback_arr[i].t])
+                            result_arr[i+addSelCallback_arr[i].t] = addSelCallback_arr[i].fun(addSelCallback_arr[i].v);
+                        else
+                            addSelCallback_arr[i].fun(result_arr[i+addSelCallback_arr[i].t], result_arr[i+addSelCallback_arr[i].s]);
+                    }
+                    if(!select_arr[i] && typeof coll_arr[i] == 'object'){
+                        if(func_arr[i]==4){
+                            cur.save(prev);
+                        }
+                        else if(func_arr[i]==5){
+                            cur.getCustomData(prev);
+                        }
+                    }
+                    else if(!select_arr[i] && typeof coll_arr[i] != 'object'){
+                        if(func_arr[i]==4){
+                            result_arr[i+cur].save(prev);
+                        }
+                        else if(func_arr[i]==5){
+                            result_arr[i+cur].getCustomData(prev);
+                        }
+                        else if(func_arr[i]==7){
+                            result_arr[i+cur].getAccount(prev);
+                        }
+                    }
+                    else {
+                        if(func_arr[i]==1){
+                            cur.findOne(select_arr[i], prev);
+                        }
+                        else if(func_arr[i]==2){
+                            cur.find(select_arr[i],prev);
+                        }
+                        else if(func_arr[i]==3){
+                            cur.createAccount(select_arr[i],prev);
+                        }
+                        else if(func_arr[i]==6){
+                            cur.authenticateAccount(select_arr[i],prev);
+                        }
+                    }
                 }
             };
         })(ind);
@@ -634,24 +739,3 @@ function syncDBselect (coll_arr, func_arr, select_arr, addSelCallback_arr, callb
 
     f();
 }
-
-/*syncDBselect(c_arr,f_arr,s_arr,asc_arr,function(res_arr){
-    var r;
-    if(res_arr[4]){
-        r = 0;
-        for(var i = 0; i < res_arr[4].length; i++){
-            r+=res_arr[4][i].mark;
-        }
-        r/=res_arr[4].length;
-        r = Math.round(r*10)/10.0;
-    }
-    r = (r) ? r : -1;
-    var mark = (res_arr[3]) ? res_arr[3].mark : -1;
-    var newObj = {
-        cafe: res_arr[0],
-        rating: { value: r, color: getRankingColor(r, 'page') },
-        yourRating: { value: mark, color: getRankingColor(mark , 'page') },
-        subscribed: !!res_arr[1]
-    };
-    console.log(JSON.stringify(newObj));
-},function(err){console.log('not ok');})*/
