@@ -246,150 +246,112 @@ router.get('/cafe/', function(req, res){
         return parseFloat(cur);
     });
     var c_arr = [], f_arr = [], s_arr = [], asc_arr = [];
-    if(req.query.subscribed == 'true'){
-        c_arr.push(FavoritesModel, CafeModel);
-        f_arr.push(2, 2);
-        s_arr.push({userID: req.query.id}, { 'coordinates.latitude': {$gt: arr[0], $lt: arr[2]}, 'coordinates.longitude': {$gt: arr[1], $lt: arr[3]}});
-        asc_arr.push(null, function(a,b){ 
-            var x = []; 
-            for(var i = 0; i < b[0].length; i++){
-                x.push(b[0][i].cafeID);  
-            }
-            a['_id'] = { $in: x};
-        });
-    }
-    else{
-        c_arr.push(CafeModel);
-        f_arr.push(2);
-        s_arr.push({ 'coordinates.latitude': {$gt: arr[0], $lt: arr[2]}, 'coordinates.longitude': {$gt: arr[1], $lt: arr[3]}});
-        asc_arr.push(null);
-    }
-    syncDBselect(c_arr, f_arr, s_arr, asc_arr, function(res_arr){
-        var obj = {
-            "type": "FeatureCollection",
-            "features": []
-        };
-        var c1_arr = [];
-        var f1_arr = [];
-        var s1_arr = [];
-        var asc1_arr = [];
-        for (var i=0; i<res_arr[res_arr.length-1].length;i++){
-            var s = res_arr[res_arr.length-1][i];
-            c1_arr.push(FotoModel, MarksModel);
-            f1_arr.push(2,2);
-            s1_arr.push({cafeID: s._id},{cafeID: s._id});
-            asc1_arr.push({t:0, s: -1, fun: function(a,b){
-                var ar = [];
-                b.forEach(function(cur){
-                    ar.push(cloudinary.url(cur.link, {crop: 'fit', width:150, height:100}));
-                });
-                obj.features.push({
-                    type: "Feature",
-                    id: s._id,
-                    geometry: {
-                        type: "Point",
-                        coordinates: [s.coordinates.latitude, s.coordinates.longitude]
-                    },
-                    properties: {
-                        cafe: s,
-                        comments: [],
-                        photoes: ar,
-                        commentsTag:'',
-                        balloonContentBody: setBalloonContentBody(s, b)
-                    }
-                });
-            }}, {t: 0, s: -1, fun: function(a,b){
-                var mark = 0.0;
-                for(var i =0; i < b.length; i++){
-                    mark += b[i].mark;
+        if(req.query.subscribed == 'true'){
+            c_arr.push(FavoritesModel, CafeModel);
+            f_arr.push(2, 2);
+            s_arr.push({userID: req.query.id}, { 'coordinates.latitude':{$gt:arr[0], $lt:arr[2]} , 'coordinates.longitude': {$gt: arr[1], $lt: arr[3]} });
+            asc_arr.push(null, function(a,b){ 
+                var x = []; 
+                for(var i = 0; i < b[0].length; i++){
+                    x.push(b[0][i].cafeID);  
                 }
-                mark /= b.length;
-                obj.features[obj.features.length-1].properties.balloonContentHeader = setBalloonContentHeader(s,Math.round((mark)*10)/10.0);
-            }});
+                a['_id'] = { $in: x};
+            });
         }
-        syncDBselect(c1_arr, f1_arr, s1_arr, asc1_arr, function(res_arr){
-            res.json(obj);
+        else{
+            c_arr.push(CafeModel);
+            f_arr.push(2);
+            s_arr.push({'coordinates.latitude':{$gt:arr[0], $lt:arr[2]} , 'coordinates.longitude': {$gt: arr[1], $lt: arr[3]} });
+            asc_arr.push(null);
+        }
+        syncDBselect(c_arr, f_arr, s_arr, asc_arr, function(res_arr){
+            var obj = {
+                "type": "FeatureCollection",
+                "features": []
+            };
+            var c1_arr = [];
+            var f1_arr = [];
+            var s1_arr = [];
+            var asc1_arr = [];
+            for (var i=0; i<res_arr[res_arr.length-1].length;i++){
+                var s = res_arr[res_arr.length-1][i];
+                c1_arr.push(FotoModel, MarksModel);
+                f1_arr.push(2,2);
+                s1_arr.push({cafeID: s._id},{cafeID: s._id});
+                if(i>0){
+                    asc1_arr.push({t: -1, s: -2, fun: function(a,b){
+                        var ar = [];
+                        b.forEach(function(cur){
+                            ar.push(cloudinary.url(cur.link, {crop: 'fit', width:150, height:100}));
+                        });
+                        var mark = 0.0;
+                        for(var i =0; i < a.length; i++){
+                            mark += a[i].mark;
+                        }
+                        mark /= a.length;
+                        obj.features.push({
+                            type: "Feature",
+                            id: s._id,
+                            geometry: {
+                                type: "Point",
+                                coordinates: [s.coordinates.latitude, s.coordinates.longitude]
+                            },
+                            properties: {
+                                cafe: s,
+                                comments: [],
+                                photoes: ar,
+                                commentsTag:'',
+                                balloonContentBody: setBalloonContentBody(s, b),
+                                balloonContentHeader: setBalloonContentHeader(s, Math.round((mark)*10)/10.0)
+                            }
+                        });
+                    }}, null);
+                }
+                else{
+                    asc1_arr.push(null,null);
+                }
+            }
+            syncDBselect(c1_arr, f1_arr, s1_arr, asc1_arr, function(res_arr1){
+                if((res_arr.length==1 && res_arr[0].length>0)||(res_arr.length==2 && res_arr[1].length>0)){
+                    var s;
+                    if(res_arr.length % 2 ==0)
+                        s = res_arr[1][res_arr[1].length-1];
+                    else
+                        s = res_arr[0][res_arr[0].length-1];
+                    var ar = [];
+                    res_arr1[res_arr1.length-2].forEach(function(cur){
+                        ar.push(cloudinary.url(cur.link, {crop: 'fit', width:150, height:100}));
+                    });
+                    var mark = 0.0;
+                    for(var i =0; i < res_arr1[res_arr1.length-1].length; i++){
+                        mark += res_arr1[res_arr1.length-1][i].mark;
+                    }
+                    mark /= res_arr1[res_arr1.length-1].length;
+                    obj.features.push({
+                        type: "Feature",
+                        id: s._id,
+                        geometry: {
+                            type: "Point",
+                            coordinates: [s.coordinates.latitude, s.coordinates.longitude]
+                        },
+                        properties: {
+                            cafe: s,
+                            comments: [],
+                            photoes: ar,
+                            commentsTag:'',
+                            balloonContentBody: setBalloonContentBody(s, res_arr1[res_arr1.length-2]),
+                            balloonContentHeader: setBalloonContentHeader(s, Math.round((mark)*10)/10.0)
+                        }
+                    });
+                }
+                res.jsonp(obj);
+            }, function(err){
+                res.send(err);
+            });
         }, function(err){
             res.send(err);
         });
-    }, function(err){
-        res.send(err);
-    });
-                
-    /*var f = result.reduceRight(function(prev, cur, ind, arr){
-                return function (){
-                    FotoModel.find({cafeID: cur._id},function(err, result){
-                        if(err)
-                            res.status(err.status).send(err);
-                        else{
-                            MarksModel.find({cafeID: cur._id}, function(err, result_marks){
-                                if(err)
-                                    res.send(err);
-                                else{
-                                    var mark = 0.0;
-                                    for(var i=0; i< result_marks.length;i++){
-                                        mark+=result_marks[i].mark;
-                                    }
-                                    mark /= result_marks.length;
-                                    var ar = [];
-                                    result.forEach(function(cur){
-                                        ar.push(cloudinary.url(cur.link, {crop: 'fit', width:150, height:100}));
-                                    });
-                                    var newCafe = {
-                                        type: "Feature",
-                                        id: cur._id,
-                                        geometry: {
-                                            type: "Point",
-                                            coordinates: [cur.coordinates.latitude, cur.coordinates.longitude]
-                                        },
-                                        properties: {
-                                            cafe: cur,
-                                            comments: [],
-                                            photoes: ar,
-                                            commentsTag:'',
-                                            //clusterCaption: cur.name,
-                                            balloonContentBody: setBalloonContentBody(cur, result),
-                                            balloonContentHeader: setBalloonContentHeader(cur, Math.round((mark)*10)/10.0)
-                                        }
-                                    };
-                                    obj.features.push(newCafe);
-                                    prev();
-                                }
-                            });
-                        }
-                    });
-                };
-            }, function(){
-                res.jsonp(obj);
-            });
-            f();
-        }
-    };
-    if(req.query.subscribed === "false"){
-        console.log('no subscribed filter');
-        CafeModel.find({
-            'coordinates.latitude': {$gt: arr[0], $lt: arr[2]},
-            'coordinates.longitude': {$gt: arr[1], $lt: arr[3]},
-        },fu);
-    }
-    else {
-        console.log('subscribed filter');
-        FavoritesModel.find({userID: req.query.id},function(err,resultik){
-            if(!err){
-                var x = [];
-                for(var i = 0; i<resultik.length; i++)
-                    x.push(resultik[i].cafeID);
-                console.log(x);
-                CafeModel.find({
-                    'coordinates.latitude': {$gt: arr[0], $lt: arr[2]},
-                    'coordinates.longitude': {$gt: arr[1], $lt: arr[3]},
-                    _id: {$in : x}
-                },fu);
-            }
-             else
-                res.send(err);
-        });
-    }*/
+   
 });
 
 router.get('/cafe/:cafe_id/photo/', function(req, res){
@@ -498,11 +460,11 @@ router.get('/:user_id/cafe/:cafe_id/', function (req, res){
     console.log('GET cafe ' + req.params.cafe_id);
     var c_arr = [CafeModel, FavoritesModel, RankingModel, MarksModel, MarksModel];
     var f_arr = [1,1,1,1,2];
-    var s_arr = [{_id: '560bf7cc2064e7741a8f6ad4'},
-    {userID: '560a8b4da8e159ac1e9325b3' , cafeID: '560bf7cc2064e7741a8f6ad4'},
+    var s_arr = [{_id: req.params.cafe_id},
+    {userID: req.params.user_id , cafeID: req.params.cafe_id},
     {category : 'overall'},
-    {userID: '560a8b4da8e159ac1e9325b3' , cafeID: '560bf7cc2064e7741a8f6ad4'},
-    {cafeID: '560bf7cc2064e7741a8f6ad4'}];
+    {userID: req.params.user_id , cafeID: req.params.cafe_id},
+    {cafeID: req.params.cafe_id}];
     asc_arr = [null,null,null,function(a,b){a['category']=b[2]._id;}, function(a,b){a['category']=b[2]._id;}];
     syncDBselect(c_arr,f_arr,s_arr,asc_arr,function(res_arr){
         var r;
@@ -562,111 +524,7 @@ stormpath.loadApiKey(keyfile, function apiKeyFileLoaded(err, apiKey) {
         appStormpath = application;
         console.log('Stormpath Application retrieved! ' + appStormpath) ;
         app.listen(port);
-        var c_arr = [], f_arr = [], s_arr = [], asc_arr = [];
-        if(1 == 'true'){
-            c_arr.push(FavoritesModel, CafeModel);
-            f_arr.push(2, 2);
-            s_arr.push({userID: '560a86ca5264e3640503ba66'}, { 'coordinates.latitude':{$gt:53.823958, $lt:53.989382} , 'coordinates.longitude': {$gt: 27.318123, $lt: 27.782296} });
-            asc_arr.push(null, function(a,b){ 
-                var x = []; 
-                for(var i = 0; i < b[0].length; i++){
-                    x.push(b[0][i].cafeID);  
-                }
-                a['_id'] = { $in: x};
-            });
-        }
-        else{
-            c_arr.push(CafeModel);
-            f_arr.push(2);
-            s_arr.push({ 'coordinates.latitude':{$gt:53.823958, $lt:53.989382} , 'coordinates.longitude': {$gt: 27.318123, $lt: 27.782296} });
-            asc_arr.push(null);
-        }
-        syncDBselect(c_arr, f_arr, s_arr, asc_arr, function(res_arr){
-            var obj = {
-                "type": "FeatureCollection",
-                "features": []
-            };
-            var c1_arr = [];
-            var f1_arr = [];
-            var s1_arr = [];
-            var asc1_arr = [];
-            for (var i=0; i<res_arr[res_arr.length-1].length;i++){
-                var s = res_arr[res_arr.length-1][i];
-                c1_arr.push(FotoModel, MarksModel);
-                f1_arr.push(2,2);
-                s1_arr.push({cafeID: s._id},{cafeID: s._id});
-                if(i>0){
-                    asc1_arr.push({t: -1, s: -2, fun: function(a,b){
-                        var ar = [];
-                        b.forEach(function(cur){
-                            ar.push(cloudinary.url(cur.link, {crop: 'fit', width:150, height:100}));
-                        });
-                        var mark = 0.0;
-                        for(var i =0; i < a.length; i++){
-                            mark += a[i].mark;
-                        }
-                        mark /= a.length;
-                        obj.features.push({
-                            type: "Feature",
-                            id: s._id,
-                            geometry: {
-                                type: "Point",
-                                coordinates: [s.coordinates.latitude, s.coordinates.longitude]
-                            },
-                            properties: {
-                                cafe: s,
-                                comments: [],
-                                photoes: ar,
-                                commentsTag:'',
-                                balloonContentBody: setBalloonContentBody(s, b),
-                                balloonContentHeader: setBalloonContentHeader(s, Math.round((mark)*10)/10.0)
-                            }
-                        });
-                    }}, null);
-                }
-                else{
-                    asc1_arr.push(null,null);
-                }
-            }
-            syncDBselect(c1_arr, f1_arr, s1_arr, asc1_arr, function(res_arr1){
-
-                var s;
-                if(res_arr.length % 2 ==0)
-                    s = res_arr[1][res_arr[1].length-1];
-                else
-                    s = res_arr[0][res_arr[0].length-1];
-                var ar = [];
-                res_arr1[res_arr1.length-2].forEach(function(cur){
-                    ar.push(cloudinary.url(cur.link, {crop: 'fit', width:150, height:100}));
-                });
-                var mark = 0.0;
-                for(var i =0; i < res_arr1[res_arr1.length-1].length; i++){
-                    mark += res_arr1[res_arr1.length-1][i].mark;
-                }
-                mark /= res_arr1[res_arr1.length-1].length;
-                obj.features.push({
-                    type: "Feature",
-                    id: s._id,
-                    geometry: {
-                        type: "Point",
-                        coordinates: [s.coordinates.latitude, s.coordinates.longitude]
-                    },
-                    properties: {
-                        cafe: s,
-                        comments: [],
-                        photoes: ar,
-                        commentsTag:'',
-                        balloonContentBody: setBalloonContentBody(s, res_arr1[res_arr1.length-2]),
-                        balloonContentHeader: setBalloonContentHeader(s, Math.round((mark)*10)/10.0)
-                    }
-                });
-                console.log(JSON.stringify(obj));
-            }, function(err){
-                console.log(err);
-            });
-        }, function(err){
-            console.log(err);
-        });
+        
     });
 });
 
