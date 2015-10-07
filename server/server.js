@@ -386,30 +386,26 @@ router.get('/cafe/:cafe_id/comment/', function (req, res){
             res.status(err.status).send(err);
         else {
             var ar = [];
+
             var f = result_comments.reduceRight(function(prev, cur, ind, arr){
                 return function (){
-                    UserModel.findOne({_id: cur.userID},function(err, result_user){
+                    var c_arr = [UserModel, RankingModel, MarksModel];
+                    var f_arr = [1,1,1];
+                    var s_arr = [{_id: cur.userID}, {category : 'overall'}, {userID: cur.userID, cafeID: req.params.cafe_id}];
+                    var asc_arr = [null, null, function(a,b){ a['category'] = b[1]._id;}];
+                    syncDBselect(c_arr,f_arr,s_arr,asc_arr,function(res_arr){
+                        var newObj = {
+                            comment: cur,
+                            user: res_arr[0],
+                            mark: res_arr[2],
+                            color: getRankingColor(res_arr[2].mark, 'comment')
+                        };
+                        ar.push(newObj);
+                        prev();
+                    },function(err){
                         if(err)
-                            res.status(err.status).send(err);
-                        else {
-                            RankingModel.findOne({category : 'overall'}, function(err, result_category){
-                                if(err)
-                                    res.status(err.status).send(err);
-                                else {
-                                    MarksModel.findOne({userID: cur.userID, cafeID: req.params.cafe_id, category: result_category._id}, function(err, result_mark){
-                                        var newObj = {
-                                            comment: cur,
-                                            user: result_user,
-                                            mark: result_mark,
-                                            color: getRankingColor(result_mark.mark, 'comment')
-                                        };
-                                        ar.push(newObj);
-                                        prev();
-                                    });
-                                }
-                            });
-                        }
-                    });    
+                            res.send(err);
+                    });  
                 };
                 
             }, function(){
