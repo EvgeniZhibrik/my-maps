@@ -1,25 +1,25 @@
 $(document).ready(function () {
 	var app = appState.getInstance();
+	var myScr = myScript.getInstance();
 	app.getNavbar().find('#exit').click(function(){
 		if(app.getUser()){
-			logout({email: app.getUser().email}, function(json){
+			myScr.logout({email: app.getUser().email}, function(json){
 				app.setUser(null);
-				console.log(json);
 				app.changePage(app.getLoginForm().clone(true));
 			});
 		}
 	});
 
 	app.getCafePage().find('#send-cafe-comment-button').click(function(e){
-		sendComment($(this).attr('cafe-id'));
+		myScr.sendComment($(this).attr('cafe-id'), myScr.openCafePage);
 	});
 
 	app.getLoginForm().find('#input-email').on('change keyup click', function(e){
-		validateInputForm(this);
+		myScr.validateInputForm(this);
 	});
 
 	app.getLoginForm().find('#input-password').on('change keyup click', function(e){
-		validateInputForm(this);
+		myScr.validateInputForm(this);
 	});
 	
 	app.getLoginForm().find('#sign-in').click(function(){
@@ -31,23 +31,23 @@ $(document).ready(function () {
 			$.removeCookie('email');
 			$.removeCookie('password');
 		}
-		login ($('#input-email').val(), $('#input-password').val(), function(json){
+		myScr.login ($('#input-email').val(), $('#input-password').val(), function(json){
 
 			app.changePage(app.getMainContainer().clone(true));
 			app.changeData(app.getMapContainer().clone(true));
 			app.changeFilter(app.getMapFilter().clone(true));
 			app.setUser(json);
 			classMap.getInstance().initMap();
-			setUserData(app.getUser());
+			myScr.setUserData(app.getUser());
 		});
 	});
 
 	app.getLoginForm().find('#register').click(function(){
-		getUploadTag(function(json){
+		myScr.getUploadTag(function(json){
 			
 			app.changePage(app.getRegistrationForm().clone(true));
 			var uplForm = $('.upload-form');
-			setupUploadAvatarInput(json.tag, uplForm, app);
+			myScr.setupUploadAvatarInput(json.tag, uplForm, app);
 		});	
 	});
 	
@@ -76,16 +76,15 @@ $(document).ready(function () {
 				}
 			};
 			app.setAvatar(null);
-			registration(newUser, function(json){
-				console.log(json);
-				login (json.email, json.password, function(json){
+			myScr.registration(newUser, function(json){
+				myScr.login (json.email, json.password, function(json){
 					app.changePage(app.getMainContainer().clone(true));
 					app.changeData(app.getMapContainer().clone(true));
 					app.changeFilter(app.getMapFilter().clone(true));
 					app.setUser(json);
 					classMap.getInstance().reloadMap();
 					
-					setUserData(app.getUser());
+					myScr.setUserData(app.getUser());
 				});
 			});
 		}
@@ -96,11 +95,11 @@ $(document).ready(function () {
 	});
 
 	app.getMainContainer().find('#add-cafe-btn').click(function(e){
-		getUploadTag(function(json){
+		myScr.getUploadTag(function(json){
 			var regForm = app.getRegisterCafeForm().clone(true);
 			var uplForm = regForm.find('.upload-form');
 			app.changePage(regForm);
-			setupUploadInput(json.tag, uplForm, app);
+			myScr.setupUploadInput(json.tag, uplForm, app);
 		});
 	});
 	
@@ -109,7 +108,7 @@ $(document).ready(function () {
 		app.changeData(app.getMapContainer().clone(true));
 		app.changeFilter(app.getMapFilter().clone(true));
 		classMap.getInstance().reloadMap();
-		setUserData(app.getUser());
+		myScr.setUserData(app.getUser());
 	});
 
 	app.getRegisterCafeForm().find('#register-cafe').click(function(e){
@@ -136,8 +135,7 @@ $(document).ready(function () {
 					published: new Date(),
                 	link: curr
 				};
-				sendNewPhoto(newPhoto, function(json){
-					console.log('json');
+				myScr.sendNewPhoto(newPhoto, function(json){
 					prev(id);
 				});
 			};
@@ -148,10 +146,9 @@ $(document).ready(function () {
 			app.changeData(app.getMapContainer().clone(true));
 			app.changeFilter(app.getMapFilter().clone(true));
 			classMap.getInstance().reloadMap();
-			setUserData(app.getUser());
+			myScr.setUserData(app.getUser());
 		});
-		registerCafe(newCafe, function(json){
-				console.log(json);
+		myScr.registerCafe(newCafe, function(json){
 				f(json._id);
 		});
 	});
@@ -164,11 +161,11 @@ $(document).ready(function () {
 	});
 
 	app.getCafePage().find('#cafe-add-places').click(function(e){
-		subscribeCafe($(this).attr('cafe-id'));
+		myScr.subscribeCafe($(this).attr('cafe-id'), myScr.openCafePage);
 	});
 	
 	app.getCafePage().find('#cafe-remove-places').click(function(e){
-		unsubscribeCafe($(this).attr('cafe-id'));
+		myScr.unsubscribeCafe($(this).attr('cafe-id'), myScr.openCafePage);
 	});
 
 	app.getCafePage().find('.btn-comments').click(function(e){
@@ -188,18 +185,18 @@ $(document).ready(function () {
 
 	activateOffcanvas(app.getMainContainer());
 	if($.cookie('email') && $.cookie('password'))
-		login($.cookie('email'),$.cookie('password'), function (json){
+		myScr.login($.cookie('email'),$.cookie('password'), function (json){
 			app.changePage(app.getMainContainer().clone(true));
 			app.changeData(app.getMapContainer().clone(true));
 			app.changeFilter(app.getMapFilter().clone(true));
 			app.setUser(json);
 			classMap.getInstance().initMap();
-			setUserData(app.getUser());
+			myScr.setUserData(app.getUser());
 		});
 	else{
 		app.changePage(app.getLoginForm().clone(true));
-		validateInputForm($('#input-email'));
-		validateInputForm($('#input-password'));
+		myScr.validateInputForm($('#input-email'));
+		myScr.validateInputForm($('#input-password'));
 	}
 
 

@@ -73,7 +73,7 @@ function setBalloonContentBody(doc, photoes){
             '</div>'+
             '<div class = "col-xs-12 col-sm-8">'+
                 '<button class = "btn btn-success btn-balloon" type="button" onclick = "route(\''+doc._id+'\'")">Route</button>'+
-                '<button class = "btn btn-info btn-balloon" type="button" onclick = "openCafePage(\''+ doc._id +'\')" id = "' + doc._id + '">Cafe page</button>'+
+                '<button class = "btn btn-info btn-balloon" type="button" onclick = "myScript.getInstance().openCafePage(\''+ doc._id +'\')" id = "' + doc._id + '">Cafe page</button>'+
             '</div>'+
         '</div>'+
     '</div>';
@@ -156,7 +156,7 @@ router.get('/upload_tag/', function(req, res){
 });
 
 router.delete('/image/:public_id/:stored/', function(req, res){
-    console.log("DELETE " + req.params.public_id + ' ' + req.params.stored);
+    console.log("DELETE unused avatar");
     if(req.params.stored === 'false'){
         cloudinary.uploader.destroy(req.params.public_id, function(result){
             res.json(result);
@@ -188,7 +188,7 @@ router.post('/user/register/',function(req, res){
 });
 
 router.post('/user/login/', function(req, res){
-    console.log("POST login: "+req.body);
+    console.log("POST login: ");
     var c_arr = [appStormpath, -1, -1, UserModel, -1];
     var f_arr = [6,7,5,1,4];
     var s_arr = [req.body, null, null, {}, null];
@@ -201,8 +201,7 @@ router.post('/user/login/', function(req, res){
 });
 
 router.post('/user/logout/', function (req, res){
-    console.log("POST logout: "+req.body);
-    console.log(req.body.email);
+    console.log("POST logout: ");
     var c_arr = [UserModel, -1];
     var f_arr = [1, 4];
     var s_arr = [{email : req.body.email}, null];
@@ -215,7 +214,7 @@ router.post('/user/logout/', function (req, res){
 });
 
 router.post('/cafe/', function(req, res){
-    console.log("POST cafe " + req.body);
+    console.log("POST cafe ");
     var cafe = new CafeModel(req.body);
     cafe.save(function(err){
         if(!err){
@@ -228,7 +227,7 @@ router.post('/cafe/', function(req, res){
 });
 
 router.post('/photo/', function(req, res){
-    console.log('POST photo '+ req.body);
+    console.log('POST photo ');
     var photo = new FotoModel(req.body);
     photo.save(function(err){
         if(!err){
@@ -241,7 +240,7 @@ router.post('/photo/', function(req, res){
 });
 
 router.get('/cafe/', function(req, res){
-    console.log('GET cafe' + req.query.bbox + req.query.z + req.query.subscribed + req.query.id);
+    console.log('GET cafe' );
     var arr = req.query.bbox.split(',').map(function(cur){
         return parseFloat(cur);
     });
@@ -273,51 +272,52 @@ router.get('/cafe/', function(req, res){
             var f1_arr = [];
             var s1_arr = [];
             var asc1_arr = [];
-            for (var i=0; i<res_arr[res_arr.length-1].length;i++){
-                var s = res_arr[res_arr.length-1][i];
+            var l = (req.query.subscribed == 'true')? 1:0;
+            for (var i=0; i<res_arr[l].length;i++){
+                var s = res_arr[l][i];
                 c1_arr.push(FotoModel, MarksModel);
                 f1_arr.push(2,2);
                 s1_arr.push({cafeID: s._id},{cafeID: s._id});
                 if(i>0){
-                    asc1_arr.push({t: -1, s: -2, fun: function(a,b){
-                        var ar = [];
-                        b.forEach(function(cur){
-                            ar.push(cloudinary.url(cur.link, {crop: 'fit', width:150, height:100}));
-                        });
-                        var mark = 0.0;
-                        for(var i =0; i < a.length; i++){
-                            mark += a[i].mark;
-                        }
-                        mark /= a.length;
-                        obj.features.push({
-                            type: "Feature",
-                            id: s._id,
-                            geometry: {
-                                type: "Point",
-                                coordinates: [s.coordinates.latitude, s.coordinates.longitude]
-                            },
-                            properties: {
-                                cafe: s,
-                                comments: [],
-                                photoes: ar,
-                                commentsTag:'',
-                                balloonContentBody: setBalloonContentBody(s, b),
-                                balloonContentHeader: setBalloonContentHeader(s, Math.round((mark)*10)/10.0)
+                    asc1_arr.push({t: -1, s: -2, fun: (function(k){
+                        return function(a,b){
+                            var ar = [];
+                            b.forEach(function(cur){
+                                ar.push(cloudinary.url(cur.link, {crop: 'fit', width:150, height:100}));
+                            });
+                            var mark = 0.0;
+                            for(var i =0; i < a.length; i++){
+                                mark += a[i].mark;
                             }
-                        });
-                    }}, null);
+                            var s = res_arr[l][k];
+                            mark /= a.length;
+                            obj.features.push({
+                                type: "Feature",
+                                id: s._id,
+                                geometry: {
+                                    type: "Point",
+                                    coordinates: [s.coordinates.latitude, s.coordinates.longitude]
+                                },
+                                properties: {
+                                    cafe: s,
+                                    comments: [],
+                                    photoes: ar,
+                                    commentsTag:'',
+                                    balloonContentBody: setBalloonContentBody(s, b),
+                                    balloonContentHeader: setBalloonContentHeader(s, Math.round((mark)*10)/10.0)
+                                }
+                            });
+                        };
+                    })(i-1)}, null);
                 }
                 else{
                     asc1_arr.push(null,null);
                 }
             }
             syncDBselect(c1_arr, f1_arr, s1_arr, asc1_arr, function(res_arr1){
-                if((res_arr.length==1 && res_arr[0].length>0)||(res_arr.length==2 && res_arr[1].length>0)){
+                if(res_arr[l].length>0){
                     var s;
-                    if(res_arr.length % 2 ==0)
-                        s = res_arr[1][res_arr[1].length-1];
-                    else
-                        s = res_arr[0][res_arr[0].length-1];
+                    s = res_arr[l][res_arr[l].length-1];
                     var ar = [];
                     res_arr1[res_arr1.length-2].forEach(function(cur){
                         ar.push(cloudinary.url(cur.link, {crop: 'fit', width:150, height:100}));
@@ -355,7 +355,7 @@ router.get('/cafe/', function(req, res){
 });
 
 router.get('/cafe/:cafe_id/photo/', function(req, res){
-    console.log('GET photoes'+ req.params.cafe_id);
+    console.log('GET photoes');
     FotoModel.find({cafeID: req.params.cafe_id},function(err, result_photoes){
         if (err)
             res.status(err.status).send(err);
@@ -380,7 +380,7 @@ router.get('/cafe/:cafe_id/photo/', function(req, res){
 });
 
 router.get('/cafe/:cafe_id/comment/', function (req, res){
-    console.log('GET comments' + req.params.cafe_id);
+    console.log('GET comments');
     CafeCommentModel.find({cafeID: req.params.cafe_id}, function(err, result_comments){
         if(err)
             res.status(err.status).send(err);
@@ -409,7 +409,6 @@ router.get('/cafe/:cafe_id/comment/', function (req, res){
                 };
                 
             }, function(){
-                console.log(ar);
                 res.json(ar);
             });
             f();
@@ -418,7 +417,7 @@ router.get('/cafe/:cafe_id/comment/', function (req, res){
 });
 
 router.post('/cafe/:cafe_id/comment/', function (req, res){
-    console.log('POST comment ' + req.body);
+    console.log('POST comment ');
     var newObj = new CafeCommentModel(req.body);
     newObj.save(function(err){
         if(err)
@@ -430,7 +429,7 @@ router.post('/cafe/:cafe_id/comment/', function (req, res){
 });
 
 router.post('/cafe/:cafe_id/mark/:category/', function(req, res){
-    console.log('POST mark' + req.params.category + ' ' + req.params.cafe_id + ' ' + req.body);
+    console.log('POST mark');
     RankingModel.findOne({category: req.params.category}, function(err, result_category){
         if(err)
             res.status(err.status).send(err);
@@ -453,7 +452,7 @@ router.post('/cafe/:cafe_id/mark/:category/', function(req, res){
 });
 
 router.get('/:user_id/cafe/:cafe_id/', function (req, res){
-    console.log('GET cafe ' + req.params.cafe_id);
+    console.log('GET cafe ');
     var c_arr = [CafeModel, FavoritesModel, RankingModel, MarksModel, MarksModel];
     var f_arr = [1,1,1,1,2];
     var s_arr = [{_id: req.params.cafe_id},
@@ -485,7 +484,7 @@ router.get('/:user_id/cafe/:cafe_id/', function (req, res){
 });
 
 router.post('/:user_id/cafe/:cafe_id/subscribe/', function(req, res){
-    console.log('POST subscribe ' + req.params.user_id + ' '+ req.params.cafe_id);
+    console.log('POST subscribe ');
     var like = new FavoritesModel({
         userID:  req.params.user_id,
         cafeID: req.params.cafe_id
@@ -499,7 +498,7 @@ router.post('/:user_id/cafe/:cafe_id/subscribe/', function(req, res){
 });
 
 router.delete('/:user_id/cafe/:cafe_id/subscribe/', function(req, res){
-    console.log('DELETE subscribe ' + req.params.user_id + ' '+ req.params.cafe_id);
+    console.log('DELETE subscribe ');
     FavoritesModel.remove({userID:req.params.user_id, cafeID: req.params.cafe_id}, function(err){
         if(err)
             res.status(err.status).send(err);
@@ -513,12 +512,10 @@ app.use('/api/v1.0', router);
 stormpath.loadApiKey(keyfile, function apiKeyFileLoaded(err, apiKey) {
     if (err) throw err;
     client = new stormpath.Client({apiKey: apiKey});
-    console.log('Created client! ' + client);
     
     client.getApplication(security.application ,function(error, application) {
         if (error) throw error;
         appStormpath = application;
-        console.log('Stormpath Application retrieved! ' + appStormpath) ;
         app.listen(port);
         
     });
